@@ -61,21 +61,21 @@ export default async function handler(request, response) {
   }
 
   const amount = Number(request.body?.amount);
-  const buyerName = text(request.body?.name);
-  const buyerEmail = text(request.body?.email);
-  const buyerPhone = text(request.body?.phone);
+const buyerName = text(request.body?.name);
+const buyerEmail = text(request.body?.email);
+const buyerPhone = text(request.body?.phone);
 
-  if (
-    !Number.isInteger(amount) ||
-    amount < minimumDonation ||
-    !buyerName ||
-    !buyerPhone ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail)
-  ) {
-    return response.status(400).json({
-      error: `Isi data dengan benar. Donasi minimum Rp${minimumDonation.toLocaleString('id-ID')}.`
-    });
-  }
+if (
+  !Number.isInteger(amount) ||
+  amount < minimumDonation ||
+  !buyerName ||
+  !buyerPhone ||
+  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail)
+) {
+  return response.status(400).json({
+    error: `Isi data dengan benar. Donasi minimum Rp${minimumDonation.toLocaleString('id-ID')}.`
+  });
+}
 
   const referenceId =
     `ALF-${Date.now()}-${Math.random()
