@@ -6,6 +6,35 @@ function text(value, maximum = 120) {
   return String(value || '').trim().slice(0, maximum);
 }
 
+function cleanUrl(value) {
+  if (!value) {
+    return null;
+  }
+
+  const stringValue = String(value).trim();
+
+  // Format Markdown:
+  // [https://example.com](https://example.com)
+  const markdownMatch = stringValue.match(
+    /^\[.*?\]\((https?:\/\/[^)]+)\)$/
+  );
+
+  if (markdownMatch) {
+    return markdownMatch[1];
+  }
+
+  // Ambil URL langsung jika ada
+  const urlMatch = stringValue.match(
+    /https?:\/\/[^\s)]+/
+  );
+
+  if (urlMatch) {
+    return urlMatch[0];
+  }
+
+  return stringValue;
+}
+
 function originFrom(request) {
   const forwardedHost = request.headers['x-forwarded-host'];
   const host = forwardedHost || request.headers.host;
@@ -17,7 +46,8 @@ function originFrom(request) {
 function createTimestamp() {
   const now = new Date();
 
-  const pad = (value) => String(value).padStart(2, '0');
+  const pad = (value) =>
+    String(value).padStart(2, '0');
 
   return (
     now.getFullYear() +
@@ -29,7 +59,12 @@ function createTimestamp() {
   );
 }
 
-function createSignature({ method, va, body, apiKey }) {
+function createSignature({
+  method,
+  va,
+  body,
+  apiKey
+}) {
   const bodyHash = createHash('sha256')
     .update(body)
     .digest('hex');
@@ -42,8 +77,10 @@ function createSignature({ method, va, body, apiKey }) {
     .digest('hex');
 }
 
-export default async function handler(request, response) {
-  // Only allow POST
+export default async function handler(
+  request,
+  response
+) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
 
@@ -52,159 +89,168 @@ export default async function handler(request, response) {
     });
   }
 
-  // Get iPaymu credentials
   const va = process.env.IPAYMU_VA;
   const apiKey = process.env.IPAYMU_API_KEY;
 
   if (!va || !apiKey) {
     return response.status(503).json({
-      error: 'Pembayaran iPaymu belum dikonfigurasi oleh admin.'
+      error:
+        'Pembayaran iPaymu belum dikonfigurasi oleh admin.'
     });
   }
 
-  // Get request data
-  const amount = Number(request.body?.amount);
-  const buyerName = text(request.body?.name);
-  const buyerEmail = text(request.body?.email);
-  const buyerPhone = text(request.body?.phone);
+  const amount =
+    Number(request.body?.amount);
 
-  // Validate amount
+  const buyerName =
+    text(request.body?.name);
+
+  const buyerEmail =
+    text(request.body?.email);
+
+  const buyerPhone =
+    text(request.body?.phone);
+
   if (!Number.isInteger(amount)) {
     return response.status(400).json({
-      error: 'Nominal donasi harus berupa angka.'
+      error:
+        'Nominal donasi harus berupa angka.'
     });
   }
 
-  // Validate minimum donation
   if (amount < minimumDonation) {
     return response.status(400).json({
-      error: `Donasi minimum Rp${minimumDonation.toLocaleString('id-ID')}.`
+      error:
+        `Donasi minimum Rp${minimumDonation.toLocaleString('id-ID')}.`
     });
   }
 
-  // Validate name
   if (!buyerName) {
     return response.status(400).json({
       error: 'Nama wajib diisi.'
     });
   }
 
-  // Validate phone
   if (!buyerPhone) {
     return response.status(400).json({
-      error: 'Nomor WhatsApp wajib diisi.'
+      error:
+        'Nomor WhatsApp wajib diisi.'
     });
   }
 
-  // Validate email
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail)) {
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      buyerEmail
+    )
+  ) {
     return response.status(400).json({
-      error: 'Format email tidak valid.'
+      error:
+        'Format email tidak valid.'
     });
   }
 
-  // Generate unique reference ID
   const referenceId =
     `ALF-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 7)
       .toUpperCase()}`;
 
-  // Get application origin
-  const origin = originFrom(request);
+  const origin =
+    originFrom(request);
 
-  // iPaymu request body
   const body = {
     name: buyerName,
     phone: buyerPhone,
     email: buyerEmail,
     amount,
-
     notifyUrl:
       `${origin}/api/ipaymu-callback`,
-
     referenceId,
-
     paymentMethod: 'qris',
     paymentChannel: 'mpm',
-
     successUrl:
       `${origin}/terima-kasih.html?reference=${encodeURIComponent(referenceId)}`,
-
     cancelUrl:
       `${origin}/`
   };
 
-  // Convert body to JSON
-  const payload = JSON.stringify(body);
+  const payload =
+    JSON.stringify(body);
 
-  // Generate iPaymu signature
-  const signature = createSignature({
-    method: 'POST',
-    va,
-    body: payload,
-    apiKey
-  });
+  const signature =
+    createSignature({
+      method: 'POST',
+      va,
+      body: payload,
+      apiKey
+    });
 
-  // Generate timestamp
-  const timestamp = createTimestamp();
+  const timestamp =
+    createTimestamp();
 
-  // iPaymu base URL
   const baseUrl =
     process.env.IPAYMU_BASE_URL ||
     'https://sandbox.ipaymu.com';
 
-  // Direct Payment endpoint
   const endpoint =
     `${baseUrl}/api/v2/payment/direct`;
 
   try {
-    console.log('Sending payment request to iPaymu:', {
-      endpoint,
-      amount,
-      referenceId,
-      paymentMethod: 'qris',
-      paymentChannel: 'mpm'
-    });
-
-    const payment = await fetch(endpoint, {
-      method: 'POST',
-
-      headers: {
-        'Content-Type': 'application/json',
-        va,
-        signature,
-        timestamp
-      },
-
-      body: payload
-    });
-
-    // Read iPaymu response
-    const result = await payment.json();
-
-    console.log('iPaymu response:', {
-      status: payment.status,
-      result
-    });
-
     console.log(
-      'iPaymu FULL RESULT:',
-      JSON.stringify(result, null, 2)
+      'Sending payment request to iPaymu:',
+      {
+        endpoint,
+        amount,
+        referenceId,
+        paymentMethod: 'qris',
+        paymentChannel: 'mpm'
+      }
     );
 
-    // Get QRIS data from iPaymu
-    const data = result?.Data;
+    const payment =
+      await fetch(endpoint, {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json',
+          va,
+          signature,
+          timestamp
+        },
+
+        body: payload
+      });
+
+    const result =
+      await payment.json();
+
+    console.log(
+      'iPaymu response:',
+      {
+        status: payment.status,
+        result
+      }
+    );
+
+    const data =
+      result?.Data;
+
+    // ==========================
+    // CLEAN QR URL
+    // ==========================
 
     const qrImage =
-      data?.QrImage ||
-      data?.qrImage ||
-      null;
+      cleanUrl(
+        data?.QrImage ||
+        data?.qrImage
+      );
 
     const qrTemplate =
-      data?.QrTemplate ||
-      data?.qrTemplate ||
-      null;
+      cleanUrl(
+        data?.QrTemplate ||
+        data?.qrTemplate
+      );
 
     const transactionId =
       data?.TransactionId ||
@@ -226,8 +272,19 @@ export default async function handler(request, response) {
       data?.expired ||
       null;
 
-    // Check iPaymu response
-    if (!payment.ok || !result?.Success || !qrImage) {
+    console.log(
+      'Clean QR URLs:',
+      {
+        qrImage,
+        qrTemplate
+      }
+    );
+
+    if (
+      !payment.ok ||
+      !result?.Success ||
+      !qrImage
+    ) {
       console.error(
         'iPaymu payment rejected:',
         result
@@ -241,34 +298,31 @@ export default async function handler(request, response) {
       });
     }
 
-    // Payment successfully created
-    console.log('iPaymu QRIS created successfully:', {
-      referenceId,
-      transactionId,
-      sessionId,
-      qrImage,
-      qrTemplate,
-      expired
-    });
+    console.log(
+      'iPaymu QRIS created successfully:',
+      {
+        referenceId,
+        transactionId,
+        sessionId,
+        qrImage,
+        qrTemplate,
+        expired
+      }
+    );
 
     return response.status(200).json({
       success: true,
-
       referenceId,
-
       transactionId,
       sessionId,
-
       paymentMethod: 'qris',
       paymentChannel: 'mpm',
-
       qrImage,
       qrTemplate,
-
       paymentNo,
       expired,
-
-      message: 'QRIS berhasil dibuat.'
+      message:
+        'QRIS berhasil dibuat.'
     });
 
   } catch (error) {
