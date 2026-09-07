@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 
-const minimumDonation = 10000;
+const minimumDonation = 5000;
 
 function text(value, maximum = 120) {
   return String(value || '').trim().slice(0, maximum);
