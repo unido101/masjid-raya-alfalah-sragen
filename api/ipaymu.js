@@ -177,9 +177,14 @@ export default async function handler(request, response) {
     const result = await payment.json();
 
     console.log('iPaymu response:', {
-      status: payment.status,
-      result
-    });
+  status: response.status,
+  result
+});
+
+console.log(
+  'iPaymu FULL RESULT:',
+  JSON.stringify(result, null, 2)
+);
 
     // Try several possible response URL formats
     const checkoutUrl =
