@@ -1,0 +1,17 @@
+/* A lighter, more contemporary layer over the base layout. */
+:root { font-family: 'Plus Jakarta Sans', sans-serif; }
+.button, .text-link, .button-quiet, .copy-button, input, textarea { font-family: 'Plus Jakarta Sans', sans-serif; }
+.hero h1, h2, .hero-card p, .program-card h3, .report-card h3, .payment-option h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  letter-spacing: -.045em;
+}
+.hero { background: var(--cream); padding: 88px 0; }
+.hero h1 { font-size: clamp(2.8rem, 5.6vw, 4.9rem); line-height: 1.08; }
+.hero-card { min-height: 290px; border: 1px solid #3b3428; border-radius: 12px; box-shadow: none; }
+.program-card, .report-card, .payment-option, .modal-inner { border-radius: 12px; }
+.program-card { min-height: 330px; padding: 28px; }
+.program-card.featured { background: var(--paper); border-top: 3px solid var(--yellow); }
+.program-icon, .report-icon { font-size: 1.55rem; }
+.about-mark { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800; }
+.donation-strip { padding: 58px 0; }

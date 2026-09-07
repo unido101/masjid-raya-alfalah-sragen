@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Website resmi Masjid Raya Al-Falah Sragen untuk program jamaah, donasi, dan laporan." />
+    <title>Masjid Raya Al-Falah Sragen</title>
+    <link rel="icon" href="assets/logo-alfalah.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="minimal.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#konten">Lewati ke konten</a>
+    <header class="site-header">
+      <nav class="nav container" aria-label="Navigasi utama">
+        <a class="brand" href="#beranda" aria-label="Masjid Raya Al-Falah, beranda"><img src="assets/logo-alfalah.png" alt="Logo Masjid Raya Al-Falah Sragen" /></a>
+        <button class="menu-button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+        <div class="nav-links" id="nav-links">
+          <a href="#program">Program</a><a href="#laporan">Laporan</a><a href="#tentang">Tentang</a>
+          <button class="button button-small open-donation">Donasi sekarang</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="konten">
+      <section class="hero" id="beranda">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Masjid Raya Al-Falah · Sragen</p>
+            <h1>Menumbuhkan kebaikan, bersama jamaah.</h1>
+            <p class="lead">Berbagi melalui program yang dekat dengan kebutuhan umat—terbuka, mudah diakses, dan penuh kebermanfaatan.</p>
+            <div class="hero-actions"><button class="button open-donation">Salurkan donasi</button><a class="text-link" href="#program">Lihat program <span>→</span></a></div>
+          </div>
+          <aside class="hero-card" aria-label="Pesan kebaikan">
+            <span class="hero-symbol">✦</span>
+            <p>“Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.”</p>
+            <span class="card-caption">Mari hadirkan manfaat yang berkelanjutan.</span>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section programs" id="program">
+        <div class="container"><div class="section-heading"><div><p class="eyebrow">Program jamaah</p><h2>Kebaikan yang bisa kita jaga bersama</h2></div><p>Ikuti dan dukung kegiatan yang menghidupkan masjid serta menguatkan sesama.</p></div>
+          <div class="program-grid">
+            <article class="program-card"><div class="program-icon">☾</div><p class="program-type">Layanan masjid</p><h3>Buka 24 Jam</h3><p>Menjaga masjid tetap terbuka sebagai ruang ibadah, istirahat, dan persinggahan yang aman bagi jamaah.</p><div class="card-actions"><button class="text-link register-program" data-program="Buka 24 Jam">Daftar relawan <span>→</span></button><button class="button-quiet open-donation" data-program="Buka 24 Jam">Dukung program</button></div></article>
+            <article class="program-card featured"><div class="program-icon">⌁</div><p class="program-type">Kepedulian sosial</p><h3>Makan Gratis Setiap Hari</h3><p>Menghadirkan hidangan hangat bagi jamaah dan masyarakat yang membutuhkan, setiap hari.</p><div class="card-actions"><button class="text-link register-program" data-program="Makan Gratis Setiap Hari">Daftar relawan <span>→</span></button><button class="button-quiet open-donation" data-program="Makan Gratis Setiap Hari">Dukung program</button></div></article>
+            <article class="program-card"><div class="program-icon">۞</div><p class="program-type">Pembinaan umat</p><h3>Masjid Subuh Quran</h3><p>Ruang untuk memulai hari dengan shalat Subuh berjamaah, tilawah, kajian, dan silaturahmi.</p><div class="card-actions"><button class="text-link register-program" data-program="Masjid Subuh Quran">Daftar program <span>→</span></button><button class="button-quiet open-donation" data-program="Masjid Subuh Quran">Dukung program</button></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="donation-strip"><div class="container donation-strip-inner"><div><p class="eyebrow">Infaq & donasi</p><h2>Satu donasi, banyak kebaikan.</h2><p>Salurkan infak terbaik melalui QRIS, transfer bank, atau pembayaran online.</p></div><button class="button button-light open-donation">Pilih cara donasi</button></div></section>
+
+      <section class="section reports" id="laporan"><div class="container reports-grid"><div><p class="eyebrow">Laporan publik</p><h2>Terbuka dalam setiap amanah.</h2><p class="lead-small">Laporan penerimaan dan penyaluran akan dipublikasikan secara berkala di halaman ini.</p><p class="muted">Belum ada laporan yang dipublikasikan. Silakan kunjungi kembali untuk pembaruan berikutnya.</p></div><div class="report-card"><span class="report-icon">▤</span><h3>Laporan kegiatan</h3><p>Ringkasan program, penerimaan, dan penyaluran dana akan tersedia untuk dilihat oleh seluruh jamaah.</p><span class="status">Menunggu publikasi</span></div></div></section>
+
+      <section class="section about" id="tentang"><div class="container about-grid"><div class="about-mark">الخير</div><div><p class="eyebrow">Tentang kami</p><h2>Rumah ibadah, ruang bertumbuh, tempat berbagi.</h2><p>Masjid Raya Al-Falah Sragen hadir untuk menghidupkan ibadah dan kebaikan sosial di tengah masyarakat.</p><a class="text-link" href="https://www.instagram.com/masjidrayalfalah_" target="_blank" rel="noreferrer">Ikuti kabar kebaikan kami <span>→</span></a></div></div></section>
+    </main>
+
+    <footer><div class="container footer-inner"><img src="assets/logo-alfalah.png" alt="Masjid Raya Al-Falah Sragen" /><div><strong>Masjid Raya Al-Falah Sragen</strong><p>© <span id="year"></span> · Menguatkan kebaikan bersama.</p></div><a href="https://wa.me/6287854429107" target="_blank" rel="noreferrer">Hubungi admin ↗</a></div></footer>
+
+    <dialog class="modal" id="donation-modal" aria-labelledby="donation-title"><div class="modal-inner"><button class="modal-close" aria-label="Tutup">×</button><p class="eyebrow">Infaq & donasi</p><h2 id="donation-title">Pilih cara berbagi</h2><p class="modal-intro">Setiap kontribusi Anda berarti bagi program-program Al-Falah.</p><div class="payment-options"><section class="payment-option"><h3>Scan QRIS</h3><p>Praktis melalui aplikasi pembayaran pilihan Anda.</p><img class="qris" src="assets/qris-alfalah.png" alt="QRIS donasi Masjid Raya Al-Falah Sragen" /><a class="button button-full" href="assets/qris-alfalah.png" target="_blank">Buka QRIS</a></section><section class="payment-option"><h3>Transfer BSI</h3><p class="bank-number">445 482 9190</p><p>a.n. Tamir Masjid Raya Al Falah</p><button class="copy-button" data-copy="4454829190">Salin nomor rekening</button></section><section class="payment-option ipaymu"><h3>iPaymu</h3><p>Pembayaran online akan tersedia setelah checkout iPaymu terhubung ke server aman.</p><span class="status">Segera hadir</span></section></div><p class="modal-note">Konfirmasi atau pertanyaan donasi: <a href="https://wa.me/6287854429107" target="_blank" rel="noreferrer">WhatsApp Admin Masjid Raya Al-Falah</a>.</p></div></dialog>
+
+    <dialog class="modal" id="registration-modal" aria-labelledby="registration-title"><div class="modal-inner narrow"><button class="modal-close" aria-label="Tutup">×</button><p class="eyebrow">Pendaftaran program</p><h2 id="registration-title">Mari ambil bagian</h2><p class="modal-intro">Pendaftaran akan diteruskan ke WhatsApp admin agar dapat ditindaklanjuti.</p><form id="registration-form"><label>Program<input id="program-name" name="program" readonly /></label><label>Nama lengkap<input name="nama" required placeholder="Nama Anda" /></label><label>Nomor WhatsApp<input name="whatsapp" required inputmode="tel" placeholder="08xxxxxxxxxx" /></label><label>Pesan <textarea name="pesan" rows="3" placeholder="Contoh: Saya ingin menjadi relawan."></textarea></label><button class="button button-full" type="submit">Lanjut ke WhatsApp</button></form></div></dialog>
+    <script src="script.js"></script>
+  </body>
+</html>
