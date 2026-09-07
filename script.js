@@ -22,6 +22,25 @@ document.querySelector('#registration-form').addEventListener('submit', (event) 
   const message = `Assalamu'alaikum, saya ingin mendaftar program *${data.get('program')}*.%0A%0ANama: ${data.get('nama')}%0ANo. WhatsApp: ${data.get('whatsapp')}%0APesan: ${data.get('pesan') || '-'}`;
   window.open(`https://wa.me/6287854429107?text=${message}`, '_blank', 'noopener');
 });
+document.querySelector('#ipaymu-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
+  const feedback = document.querySelector('#ipaymu-feedback');
+  button.disabled = true;
+  button.textContent = 'Menyiapkan pembayaran…';
+  feedback.textContent = '';
+  try {
+    const payment = await fetch('/api/ipaymu', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+    const result = await payment.json();
+    if (!payment.ok) throw new Error(result.error || 'Pembayaran belum dapat dibuat.');
+    window.location.assign(result.checkoutUrl);
+  } catch (error) {
+    feedback.textContent = error.message;
+    button.disabled = false;
+    button.textContent = 'Lanjut ke iPaymu';
+  }
+});
 const menuButton = document.querySelector('.menu-button');
 menuButton.addEventListener('click', () => {
   const links = document.querySelector('.nav-links');
