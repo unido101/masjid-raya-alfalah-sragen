@@ -119,13 +119,20 @@ export default async function handler(request, response) {
     phone: buyerPhone,
     email: buyerEmail,
     amount,
-    notifyUrl: `${origin}/api/ipaymu-callback`,
+
+    notifyUrl:
+      `${origin}/api/ipaymu-callback`,
+
     referenceId,
+
     paymentMethod: 'qris',
     paymentChannel: 'mpm',
+
     successUrl:
       `${origin}/terima-kasih.html?reference=${encodeURIComponent(referenceId)}`,
-    cancelUrl: `${origin}/`
+
+    cancelUrl:
+      `${origin}/`
   };
 
   // Convert body to JSON
@@ -177,25 +184,52 @@ export default async function handler(request, response) {
     const result = await payment.json();
 
     console.log('iPaymu response:', {
-  status: response.status,
-  result
-});
+      status: payment.status,
+      result
+    });
 
-console.log(
-  'iPaymu FULL RESULT:',
-  JSON.stringify(result, null, 2)
-);
+    console.log(
+      'iPaymu FULL RESULT:',
+      JSON.stringify(result, null, 2)
+    );
 
-    // Try several possible response URL formats
-    const checkoutUrl =
-      result?.Data?.Url ||
-      result?.Data?.url ||
-      result?.url;
+    // Get QRIS data from iPaymu
+    const data = result?.Data;
 
-    // Handle rejected payment
-    if (!payment.ok || !checkoutUrl) {
+    const qrImage =
+      data?.QrImage ||
+      data?.qrImage ||
+      null;
+
+    const qrTemplate =
+      data?.QrTemplate ||
+      data?.qrTemplate ||
+      null;
+
+    const transactionId =
+      data?.TransactionId ||
+      data?.transactionId ||
+      null;
+
+    const sessionId =
+      data?.SessionId ||
+      data?.sessionId ||
+      null;
+
+    const paymentNo =
+      data?.PaymentNo ||
+      data?.paymentNo ||
+      null;
+
+    const expired =
+      data?.Expired ||
+      data?.expired ||
+      null;
+
+    // Check iPaymu response
+    if (!payment.ok || !result?.Success || !qrImage) {
       console.error(
-        'iPaymu checkout rejected:',
+        'iPaymu payment rejected:',
         result
       );
 
@@ -208,9 +242,33 @@ console.log(
     }
 
     // Payment successfully created
+    console.log('iPaymu QRIS created successfully:', {
+      referenceId,
+      transactionId,
+      sessionId,
+      qrImage,
+      qrTemplate,
+      expired
+    });
+
     return response.status(200).json({
-      checkoutUrl,
-      referenceId
+      success: true,
+
+      referenceId,
+
+      transactionId,
+      sessionId,
+
+      paymentMethod: 'qris',
+      paymentChannel: 'mpm',
+
+      qrImage,
+      qrTemplate,
+
+      paymentNo,
+      expired,
+
+      message: 'QRIS berhasil dibuat.'
     });
 
   } catch (error) {
