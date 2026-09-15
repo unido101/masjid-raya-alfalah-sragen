@@ -188,9 +188,7 @@ export default async function handler(
   const timestamp =
     createTimestamp();
 
-  const baseUrl =
-    process.env.IPAYMU_BASE_URL ||
-    'https://sandbox.ipaymu.com';
+  const baseUrl = process.env.IPAYMU_BASE_URL;
 
   const endpoint =
     `${baseUrl}/api/v2/payment/direct`;
