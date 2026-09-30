@@ -1,29 +1,35 @@
 import { MongoClient, ObjectId } from "mongodb";
 
+const minimumDonation = 5000;
+
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || "alfalah";
 
 let client;
 let clientPromise;
 
-if (!uri) {
-  console.error("MONGODB_URI belum dikonfigurasi.");
-} else {
-  client = new MongoClient(uri);
+async function getClient() {
+  if (!uri) {
+    throw new Error("MONGODB_URI belum dikonfigurasi di Vercel.");
+  }
 
-  clientPromise = client.connect();
+  if (!clientPromise) {
+    if (!client) {
+      client = new MongoClient(uri);
+    }
+
+    clientPromise = client.connect();
+  }
+
+  return clientPromise;
 }
 
 async function getCollection() {
-  if (!clientPromise) {
-    throw new Error("MONGODB_URI belum dikonfigurasi.");
-  }
+  const connectedClient = await getClient();
 
-  const connectedClient = await clientPromise;
+  const db = connectedClient.db(dbName);
 
-  return connectedClient
-    .db(dbName)
-    .collection("programs");
+  return db.collection("programs");
 }
 
 function getAdminToken(request) {
@@ -106,16 +112,16 @@ export default async function handler(request, response) {
       return response.status(200).json(
         programs.map((program) => ({
           id: program._id.toString(),
-          name: program.name,
-          category: program.category,
-          description: program.description,
-          image: program.image,
-          target: program.target,
-          collected: program.collected,
-          donors: program.donors,
-          status: program.status,
-          createdAt: program.createdAt,
-          updatedAt: program.updatedAt
+          name: program.name || "",
+          category: program.category || "",
+          description: program.description || "",
+          image: program.image || "",
+          target: program.target || 0,
+          collected: program.collected || 0,
+          donors: program.donors || 0,
+          status: program.status || "active",
+          createdAt: program.createdAt || null,
+          updatedAt: program.updatedAt || null
         }))
       );
     }
@@ -131,7 +137,7 @@ export default async function handler(request, response) {
     }
 
     // =========================
-    // POST PROGRAM
+    // POST
     // =========================
 
     if (request.method === "POST") {
@@ -145,8 +151,11 @@ export default async function handler(request, response) {
         });
       }
 
+      const now = new Date();
+
       const program = {
         name,
+
         category: cleanText(
           body.category,
           80
@@ -181,8 +190,8 @@ export default async function handler(request, response) {
               ? "inactive"
               : "active",
 
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: now,
+        updatedAt: now
       };
 
       const result =
@@ -199,7 +208,7 @@ export default async function handler(request, response) {
     }
 
     // =========================
-    // PUT PROGRAM
+    // PUT
     // =========================
 
     if (request.method === "PUT") {
@@ -288,7 +297,7 @@ export default async function handler(request, response) {
     }
 
     // =========================
-    // DELETE PROGRAM
+    // DELETE
     // =========================
 
     if (request.method === "DELETE") {
@@ -327,11 +336,20 @@ export default async function handler(request, response) {
   } catch (error) {
     console.error(
       "Programs API error:",
+      error?.message
+    );
+
+    console.error(
+      "Programs API full error:",
       error
     );
 
     return response.status(500).json({
-      error: "Terjadi kesalahan pada server."
+      error: "Terjadi kesalahan pada server.",
+      detail:
+        process.env.NODE_ENV === "development"
+          ? error?.message
+          : undefined
     });
   }
 }
