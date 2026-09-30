@@ -1,0 +1,9 @@
+{
+  "name": "masjid-raya-alfalah-sragen",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "mongodb": "^6.21.0"
+  }
+}
