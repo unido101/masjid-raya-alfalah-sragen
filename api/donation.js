@@ -63,12 +63,13 @@ export default async function handler(request, response) {
     });
   }
 
-  if (!/^\+?\d{9,20}$/.test(whatsapp)) {
-    return response.status(400).json({
-      success: false,
-      error: "Nomor WhatsApp tidak valid."
-    });
-  }
+  
+if (!/^\+?\d{9,20}$/.test(whatsapp)) {
+  return response.status(400).json({
+    success: false,
+    error: "Nomor WhatsApp tidak valid."
+  });
+}
 
   if (
     !Number.isSafeInteger(amount) ||
