@@ -35,15 +35,31 @@ function cleanAmount(value) {
   return Math.round(amount);
 }
 
+
 function isAdmin(request) {
   const expectedToken = process.env.ADMIN_TOKEN;
-  const authorization = request.headers.authorization || "";
 
-  return Boolean(
-    expectedToken &&
-    authorization.startsWith("Bearer ") &&
-    authorization.slice(7).trim() === expectedToken
-  );
+  const authorization =
+    request.headers.authorization ||
+    request.headers.Authorization ||
+    "";
+
+  if (!expectedToken || typeof authorization !== "string") {
+    return false;
+  }
+
+  const prefix = "Bearer ";
+
+  if (!authorization.startsWith(prefix)) {
+    return false;
+  }
+
+  const suppliedToken = authorization
+    .slice(prefix.length)
+    .trim();
+
+  return suppliedToken.length > 0 &&
+    suppliedToken === expectedToken.trim();
 }
 
 function publicReport(report) {
