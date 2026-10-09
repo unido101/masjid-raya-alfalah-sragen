@@ -210,11 +210,17 @@ export default async function handler(request, response) {
     return response.status(405).json({
       error: "Method tidak diizinkan."
     });
-  } catch (error) {
-    console.error("Laporan API error:", error);
+  
+} catch (error) {
+  console.error("Laporan API error:", {
+    message: error?.message,
+    code: error?.code,
+    name: error?.name
+  });
 
-    return response.status(500).json({
-      error: "Terjadi kesalahan saat memproses laporan."
-    });
-  }
+  return response.status(500).json({
+    error: "Terjadi kesalahan saat memproses laporan.",
+    detail: error?.message || "Unknown server error"
+  });
+}
 }
