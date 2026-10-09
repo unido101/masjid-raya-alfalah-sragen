@@ -1,0 +1,748 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Manajemen Program | Baitul Maal Al-Falah</title>
+  <style>
+    :root {
+      --ink: #29271f;
+      --muted: #777568;
+      --gold: #c79b35;
+      --cream: #f7f5ef;
+      --line: #e9e5da;
+      --green: #416c42;
+      --red: #a83c32;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 60px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: #eee3c6;
+      color: #805d12;
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .brand h1 { margin: 0 0 5px; font-size: 19px; }
+    .brand p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .panel, .stat, .program-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .panel { padding: 26px; margin-bottom: 24px; }
+
+    .eyebrow {
+      color: #96721e;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    h2 { margin: 8px 0; font-size: clamp(24px, 4vw, 34px); }
+    .muted { color: var(--muted); line-height: 1.7; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .stat { padding: 20px; }
+    .stat span { display: block; color: var(--muted); font-size: 13px; }
+    .stat strong { display: block; margin-top: 12px; font-size: 28px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 700; }
+
+    input, textarea, select {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid #ddd8cc;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px #c79b351b;
+    }
+
+    textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 11px 16px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-gold { background: #f1e4c0; color: #674c0c; }
+    .btn-outline { background: #fff; border-color: var(--line); color: var(--ink); }
+    .btn-danger { background: #fff1ef; color: var(--red); border-color: #f0d5d1; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar h2 { font-size: 23px; }
+    .toolbar input { max-width: 300px; }
+
+    .program-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .program-item { min-width: 0; overflow: hidden; }
+
+    .program-image {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      aspect-ratio: 16 / 7;
+      overflow: hidden;
+      background: #eee7d7;
+      color: #80631d;
+      font-weight: 700;
+    }
+
+    .program-image img { width: 100%; height: 100%; object-fit: cover; }
+
+    .program-body { padding: 20px; }
+    .program-body h3 { margin: 10px 0; font-size: 19px; overflow-wrap: anywhere; }
+    .program-body p { color: var(--muted); font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+
+    .tag {
+      display: inline-block;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #f4efdf;
+      color: #81651f;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag.active { background: #eaf4e7; color: var(--green); }
+    .tag.inactive { background: #f0eee9; color: #777568; }
+    .tag.draft { background: #fff1df; color: #8b5a15; }
+
+    .program-numbers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+    }
+
+    .program-numbers span { display: block; color: var(--muted); font-size: 11px; }
+    .program-numbers strong { display: block; margin-top: 6px; font-size: 13px; overflow-wrap: anywhere; }
+
+    .item-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .item-actions .btn { flex: 1; }
+
+    .notice {
+      display: none;
+      margin: 0 0 18px;
+      padding: 13px 15px;
+      border-radius: 10px;
+      background: #eaf4e7;
+      color: #315b32;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .notice.error { background: #fff0ed; color: #9b3329; }
+    .empty { padding: 30px 10px; text-align: center; color: var(--muted); }
+
+    #app { display: none; }
+    #login { max-width: 520px; margin: 70px auto; }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 22px, 1180px); padding-top: 22px; }
+      .topbar { align-items: flex-start; }
+      .stats, .program-list, .form-grid { grid-template-columns: 1fr; }
+      .stat { padding: 16px; }
+      .stat strong { font-size: 24px; }
+      .panel { padding: 18px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .toolbar input { max-width: none; }
+      .field.full { grid-column: auto; }
+      .item-actions .btn { flex: 1 1 40%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">AF</div>
+        <div>
+          <h1>Baitul Maal Al-Falah</h1>
+          <p>Manajemen Program Donasi</p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="btn btn-outline" hidden>Keluar</button>
+    </header>
+
+    <section id="login" class="panel">
+      <p class="eyebrow">Area Pengelola</p>
+      <h2>Masuk ke manajemen program</h2>
+      <p class="muted">Gunakan token admin yang telah dikonfigurasi di Vercel.</p>
+      <div id="loginNotice" class="notice" role="status"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="token">Token admin</label>
+          <input id="token" type="password" autocomplete="current-password" required />
+          <span class="hint">Token tidak disimpan di database atau local storage browser.</span>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Masuk dashboard →</button>
+        </div>
+      </form>
+    </section>
+
+    <div id="app">
+      <section class="panel">
+        <p class="eyebrow">Ringkasan</p>
+        <h2>Kelola program kebaikan</h2>
+        <p class="muted">Atur program yang muncul pada kartu donasi di website publik.</p>
+        <div class="stats">
+          <div class="stat"><span>Total program</span><strong id="totalCount">0</strong></div>
+          <div class="stat"><span>Program aktif</span><strong id="activeCount">0</strong></div>
+          <div class="stat"><span>Total target dana</span><strong id="targetTotal">Rp0</strong></div>
+        </div>
+      </section>
+
+      <section class="panel" id="editor">
+        <p class="eyebrow" id="formEyebrow">Program baru</p>
+        <h2 id="formTitle">Tambah program donasi</h2>
+        <p class="muted">Isi informasi dengan jelas agar jamaah memahami manfaat donasinya.</p>
+        <div id="formNotice" class="notice" role="status"></div>
+
+        <form id="programForm">
+          <input id="programId" type="hidden" />
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Nama program *</label>
+              <input id="name" maxlength="120" required placeholder="Contoh: Sedekah Makan Gratis" />
+            </div>
+
+            <div class="field">
+              <label for="category">Kategori</label>
+              <input id="category" maxlength="80" placeholder="Contoh: Kepedulian Sosial" />
+            </div>
+
+            <div class="field full">
+              <label for="description">Deskripsi program</label>
+              <textarea id="description" maxlength="1000" placeholder="Jelaskan tujuan, penerima manfaat, dan dampak program."></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="image">URL foto program</label>
+              <input id="image" type="url" maxlength="1000" placeholder="https://..." />
+              <span class="hint">Gunakan URL gambar HTTPS yang bisa diakses publik. Kolom ini belum mengunggah file ke server.</span>
+            </div>
+
+            <div class="field">
+              <label for="target">Target dana (Rp)</label>
+              <input id="target" type="number" min="0" step="1" value="0" />
+            </div>
+
+            <div class="field">
+              <label for="collected">Dana terkumpul (Rp)</label>
+              <input id="collected" type="number" min="0" step="1" value="0" />
+              <span class="hint">Isi berdasarkan penerimaan yang sudah terverifikasi.</span>
+            </div>
+
+            <div class="field">
+              <label for="donors">Jumlah donatur</label>
+              <input id="donors" type="number" min="0" step="1" value="0" />
+            </div>
+
+            <div class="field">
+              <label for="status">Status publikasi</label>
+              <select id="status">
+                <option value="draft">Draft — belum ditampilkan</option>
+                <option value="active">Aktif — tampil di website</option>
+                <option value="inactive">Nonaktif — disembunyikan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="saveBtn" type="submit">Simpan program</button>
+            <button class="btn btn-outline" id="cancelEditBtn" type="button" hidden>Batal edit</button>
+            <button class="btn btn-outline" id="resetBtn" type="reset">Kosongkan form</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <p class="eyebrow">Database program</p>
+            <h2>Daftar program</h2>
+          </div>
+          <input id="search" type="search" placeholder="Cari nama program..." aria-label="Cari program" />
+        </div>
+        <div id="listNotice" class="notice" role="status"></div>
+        <div id="programList" class="program-list">
+          <p class="empty">Memuat program...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const $ = (selector) => document.querySelector(selector);
+      const rupiah = (value) => new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0
+      }).format(Math.max(0, Number(value) || 0));
+
+      let adminToken = "";
+      let programs = [];
+
+      const loginSection = $("#login");
+      const app = $("#app");
+      const logoutBtn = $("#logoutBtn");
+
+      function notice(element, message, isError = false) {
+        element.textContent = message;
+        element.classList.toggle("error", isError);
+        element.style.display = "block";
+      }
+
+      function hideNotice(element) {
+        element.style.display = "none";
+        element.textContent = "";
+      }
+
+      function escapeText(value) {
+        return String(value ?? "");
+      }
+
+      async function api(path = "", options = {}) {
+        const response = await fetch("/api/program" + path, {
+          ...options,
+          headers: {
+            Accept: "application/json",
+            ...(options.body ? { "Content-Type": "application/json" } : {}),
+            ...(adminToken ? { Authorization: "Bearer " + adminToken } : {}),
+            ...options.headers
+          },
+          cache: "no-store"
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Akses admin tidak valid. Periksa token ADMIN_TOKEN di Vercel.");
+          }
+          throw new Error(data.error || "Permintaan gagal. Coba lagi.");
+        }
+
+        return data;
+      }
+
+      async function validateToken() {
+        // GET publik tidak memerlukan token. Karena itu validasi token dilakukan
+        // lewat endpoint operasi tulis yang tidak mengubah data.
+        // Endpoint ini belum tersedia pada API saat ini, jadi dashboard
+        // memverifikasi token melalui respons GET admin jika API mendukungnya.
+        const response = await fetch("/api/program", {
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + adminToken
+          },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "Token admin tidak valid.");
+        }
+
+        // Catatan: API program saat ini membuka GET untuk publik.
+        // Validasi penuh terjadi saat operasi POST/PUT/DELETE.
+        return response.json();
+      }
+
+      function showDashboard() {
+        loginSection.style.display = "none";
+        app.style.display = "block";
+        logoutBtn.hidden = false;
+      }
+
+      function showLogin() {
+        adminToken = "";
+        programs = [];
+        loginSection.style.display = "block";
+        app.style.display = "none";
+        logoutBtn.hidden = true;
+        $("#token").value = "";
+      }
+
+      function resetForm() {
+        $("#programForm").reset();
+        $("#programId").value = "";
+        $("#target").value = "0";
+        $("#collected").value = "0";
+        $("#donors").value = "0";
+        $("#status").value = "draft";
+        $("#formTitle").textContent = "Tambah program donasi";
+        $("#formEyebrow").textContent = "Program baru";
+        $("#saveBtn").textContent = "Simpan program";
+        $("#cancelEditBtn").hidden = true;
+        hideNotice($("#formNotice"));
+      }
+
+      function renderStats() {
+        $("#totalCount").textContent = programs.length.toLocaleString("id-ID");
+        $("#activeCount").textContent = programs.filter(
+          (p) => (p.status || "active") === "active"
+        ).length.toLocaleString("id-ID");
+        $("#targetTotal").textContent = rupiah(
+          programs.reduce((sum, p) => sum + Math.max(0, Number(p.target) || 0), 0)
+        );
+      }
+
+      function renderPrograms() {
+        const list = $("#programList");
+        const query = $("#search").value.trim().toLowerCase();
+
+        const filtered = programs.filter((program) =>
+          `${program.name || ""} ${program.category || ""}`
+            .toLowerCase()
+            .includes(query)
+        );
+
+        list.replaceChildren();
+
+        if (filtered.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "empty";
+          empty.textContent = programs.length
+            ? "Tidak ada program yang cocok dengan pencarian."
+            : "Belum ada program. Tambahkan program pertama melalui form di atas.";
+          list.appendChild(empty);
+          return;
+        }
+
+        filtered.forEach((program) => {
+          const card = document.createElement("article");
+          card.className = "program-item";
+
+          const media = document.createElement("div");
+          media.className = "program-image";
+
+          if (program.image) {
+            const img = document.createElement("img");
+            img.src = program.image;
+            img.alt = program.name || "Foto program";
+            img.loading = "lazy";
+            img.onerror = () => {
+              media.replaceChildren();
+              media.textContent = "Foto tidak tersedia";
+            };
+            media.appendChild(img);
+          } else {
+            media.textContent = "Belum ada foto program";
+          }
+
+          const body = document.createElement("div");
+          body.className = "program-body";
+
+          const status = document.createElement("span");
+          status.className = "tag " + (
+            program.status === "active" ? "active" :
+            program.status === "draft" ? "draft" : "inactive"
+          );
+          status.textContent = (
+            program.status === "active" ? "Aktif" :
+            program.status === "draft" ? "Draft" : "Nonaktif"
+          );
+
+          const title = document.createElement("h3");
+          title.textContent = escapeText(program.name || "Tanpa nama");
+
+          const description = document.createElement("p");
+          description.textContent = escapeText(program.description || "Belum ada deskripsi.");
+
+          const category = document.createElement("p");
+          category.textContent = escapeText(program.category || "Tanpa kategori");
+
+          const numbers = document.createElement("div");
+          numbers.className = "program-numbers";
+
+          const target = document.createElement("div");
+          const targetLabel = document.createElement("span");
+          targetLabel.textContent = "Target dana";
+          const targetValue = document.createElement("strong");
+          targetValue.textContent = rupiah(program.target);
+          target.append(targetLabel, targetValue);
+
+          const collected = document.createElement("div");
+          const collectedLabel = document.createElement("span");
+          collectedLabel.textContent = "Dana terkumpul";
+          const collectedValue = document.createElement("strong");
+          collectedValue.textContent = rupiah(program.collected);
+          collected.append(collectedLabel, collectedValue);
+
+          numbers.append(target, collected);
+
+          const actions = document.createElement("div");
+          actions.className = "item-actions";
+
+          const edit = document.createElement("button");
+          edit.type = "button";
+          edit.className = "btn btn-gold";
+          edit.textContent = "Edit";
+          edit.addEventListener("click", () => editProgram(program));
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "btn btn-danger";
+          remove.textContent = "Hapus";
+          remove.addEventListener("click", () => deleteProgram(program));
+
+          actions.append(edit, remove);
+          body.append(status, title, category, description, numbers, actions);
+          card.append(media, body);
+          list.appendChild(card);
+        });
+      }
+
+      async function loadPrograms() {
+        hideNotice($("#listNotice"));
+        $("#programList").textContent = "Memuat program...";
+
+        try {
+          // Endpoint GET saat ini hanya mengembalikan program non-draft.
+          // Daftar draft memerlukan perubahan kecil pada API.
+          programs = await api();
+
+          if (!Array.isArray(programs)) {
+            throw new Error("Format data dari API tidak valid.");
+          }
+
+          renderStats();
+          renderPrograms();
+        } catch (error) {
+          notice($("#listNotice"), error.message, true);
+          $("#programList").textContent = "Program gagal dimuat.";
+        }
+      }
+
+      function editProgram(program) {
+        $("#programId").value = program.id;
+        $("#name").value = program.name || "";
+        $("#category").value = program.category || "";
+        $("#description").value = program.description || "";
+        $("#image").value = program.image || "";
+        $("#target").value = Number(program.target) || 0;
+        $("#collected").value = Number(program.collected) || 0;
+        $("#donors").value = Number(program.donors) || 0;
+        $("#status").value = program.status || "active";
+        $("#formTitle").textContent = "Edit program donasi";
+        $("#formEyebrow").textContent = "Perbarui program";
+        $("#saveBtn").textContent = "Simpan perubahan";
+        $("#cancelEditBtn").hidden = false;
+        hideNotice($("#formNotice"));
+        $("#editor").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function getFormData() {
+        const positiveInteger = (id) => {
+          const value = Number($("#" + id).value);
+          if (!Number.isSafeInteger(value) || value < 0) {
+            throw new Error("Nominal dan jumlah harus berupa bilangan bulat positif atau nol.");
+          }
+          return value;
+        };
+
+        const image = $("#image").value.trim();
+
+        if (image) {
+          const url = new URL(image);
+          if (url.protocol !== "https:") {
+            throw new Error("URL foto harus menggunakan HTTPS.");
+          }
+        }
+
+        return {
+          name: $("#name").value.trim(),
+          category: $("#category").value.trim(),
+          description: $("#description").value.trim(),
+          image,
+          target: positiveInteger("target"),
+          collected: positiveInteger("collected"),
+          donors: positiveInteger("donors"),
+          status: $("#status").value
+        };
+      }
+
+      $("#loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideNotice($("#loginNotice"));
+
+        adminToken = $("#token").value.trim();
+        if (!adminToken) return;
+
+        try {
+          await validateToken();
+          showDashboard();
+          await loadPrograms();
+        } catch (error) {
+          adminToken = "";
+          notice($("#loginNotice"), error.message, true);
+        }
+      });
+
+      $("#programForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideNotice($("#formNotice"));
+
+        const saveBtn = $("#saveBtn");
+        saveBtn.disabled = true;
+
+        try {
+          const payload = getFormData();
+          if (!payload.name) {
+            throw new Error("Nama program wajib diisi.");
+          }
+
+          const id = $("#programId").value;
+          const method = id ? "PUT" : "POST";
+          const path = id ? "?id=" + encodeURIComponent(id) : "";
+
+          await api(path, {
+            method,
+            body: JSON.stringify(payload)
+          });
+
+          notice($("#formNotice"), id
+            ? "Program berhasil diperbarui."
+            : "Program berhasil ditambahkan."
+          );
+
+          resetForm();
+          await loadPrograms();
+        } catch (error) {
+          notice($("#formNotice"), error.message, true);
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+
+      async function deleteProgram(program) {
+        const confirmed = window.confirm(
+          `Hapus program "${program.name}"? Tindakan ini tidak bisa dibatalkan.`
+        );
+        if (!confirmed) return;
+
+        try {
+          await api("?id=" + encodeURIComponent(program.id), {
+            method: "DELETE"
+          });
+          notice($("#listNotice"), "Program berhasil dihapus.");
+          await loadPrograms();
+        } catch (error) {
+          notice($("#listNotice"), error.message, true);
+        }
+      }
+
+      $("#cancelEditBtn").addEventListener("click", resetForm);
+      $("#resetBtn").addEventListener("click", () => {
+        window.setTimeout(resetForm, 0);
+      });
+      $("#search").addEventListener("input", renderPrograms);
+
+      logoutBtn.addEventListener("click", showLogin);
+
+      // Tidak menyimpan token setelah halaman ditutup atau dimuat ulang.
+      showLogin();
+    })();
+  </script>
+</body>
+</html>
+```
