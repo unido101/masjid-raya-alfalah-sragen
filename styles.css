@@ -12,3 +12,14 @@
 .program-icon,.report-icon{font-size:1.55rem}
 .about-mark{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(3rem,7vw,5.5rem);font-weight:800}
 .donation-strip{padding:58px 0}
+
+.reports-list {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.reports-list .report-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

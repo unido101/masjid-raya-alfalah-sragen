@@ -207,3 +207,144 @@ async function loadPrograms() {
 }
 
 loadPrograms();
+
+/* ========================================
+   LAPORAN PUBLIK DARI MONGODB
+======================================== */
+
+async function loadPublicReports() {
+  const container = document.querySelector("#reports-list");
+  const statusElement = document.querySelector("#reports-status");
+
+  if (!container) return;
+
+  const formatRupiah = (amount) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
+    }).format(Number(amount) || 0);
+
+  try {
+    const response = await fetch("/api/laporan", {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gagal mengambil laporan: ${response.status}`);
+    }
+
+    const reports = await response.json();
+
+    if (!Array.isArray(reports)) {
+      throw new Error("Format data laporan tidak valid.");
+    }
+
+    container.replaceChildren();
+
+    if (reports.length === 0) {
+      const emptyCard = document.createElement("article");
+      emptyCard.className = "report-card";
+
+      const title = document.createElement("h3");
+      title.textContent = "Belum ada laporan";
+
+      const description = document.createElement("p");
+      description.textContent =
+        "Laporan akan ditampilkan di sini setelah dipublikasikan.";
+
+      const badge = document.createElement("span");
+      badge.className = "status";
+      badge.textContent = "Menunggu publikasi";
+
+      emptyCard.append(title, description, badge);
+      container.appendChild(emptyCard);
+
+      if (statusElement) {
+        statusElement.textContent =
+          "Belum ada laporan yang dipublikasikan.";
+      }
+
+      return;
+    }
+
+    reports.forEach((report) => {
+      const card = document.createElement("article");
+      card.className = "report-card";
+
+      const icon = document.createElement("span");
+      icon.className = "report-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "▤";
+
+      const title = document.createElement("h3");
+      title.textContent = report.title || "Laporan kegiatan";
+
+      const period = document.createElement("p");
+      period.textContent = report.period
+        ? `Periode: ${report.period}`
+        : "";
+
+      const summary = document.createElement("p");
+      summary.textContent =
+        report.summary || "Ringkasan laporan belum tersedia.";
+
+      const income = document.createElement("p");
+      income.textContent =
+        `Penerimaan: ${formatRupiah(report.penerimaan)}`;
+
+      const distribution = document.createElement("p");
+      distribution.textContent =
+        `Penyaluran: ${formatRupiah(report.penyaluran)}`;
+
+      const badge = document.createElement("span");
+      badge.className = "status";
+      badge.textContent = "Telah dipublikasikan";
+
+      card.append(
+        icon,
+        title,
+        period,
+        summary,
+        income,
+        distribution,
+        badge
+      );
+
+      container.appendChild(card);
+    });
+
+    if (statusElement) {
+      statusElement.textContent =
+        `${reports.length} laporan berhasil ditampilkan.`;
+    }
+  } catch (error) {
+    console.error("Gagal memuat laporan publik:", error);
+
+    container.replaceChildren();
+
+    const errorCard = document.createElement("article");
+    errorCard.className = "report-card";
+
+    const title = document.createElement("h3");
+    title.textContent = "Laporan belum dapat dimuat";
+
+    const description = document.createElement("p");
+    description.textContent =
+      "Silakan coba kembali beberapa saat lagi.";
+
+    errorCard.append(title, description);
+    container.appendChild(errorCard);
+
+    if (statusElement) {
+      statusElement.textContent =
+        "Terjadi kendala saat mengambil laporan.";
+    }
+  }
+}
+
+loadPublicReports();
