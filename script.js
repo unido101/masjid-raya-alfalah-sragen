@@ -127,15 +127,19 @@ if (yearElement) {
 
 async function loadPrograms() {
   const container = document.querySelector(".program-grid");
-
   if (!container) return;
+
+  const formatRupiah = (value) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
+    }).format(Math.max(0, Number(value) || 0));
 
   try {
     const response = await fetch("/api/program", {
       method: "GET",
-      headers: {
-        Accept: "application/json"
-      },
+      headers: { Accept: "application/json" },
       cache: "no-store"
     });
 
@@ -145,9 +149,8 @@ async function loadPrograms() {
 
     const programs = await response.json();
 
-    if (!Array.isArray(programs) || programs.length === 0) {
-      console.info("Belum ada program aktif dari database.");
-      return;
+    if (!Array.isArray(programs)) {
+      throw new Error("Format data program tidak valid.");
     }
 
     const visiblePrograms = programs.filter((program) => {
@@ -155,54 +158,140 @@ async function loadPrograms() {
       return status === "active";
     });
 
+    container.replaceChildren();
+
     if (visiblePrograms.length === 0) {
-      console.info("Belum ada program aktif yang dipublikasikan.");
+      const empty = document.createElement("p");
+      empty.className = "program-empty";
+      empty.textContent = "Belum ada program donasi aktif saat ini.";
+      container.appendChild(empty);
       return;
     }
 
-    container.replaceChildren();
+    visiblePrograms.forEach((program) => {
+      const name = program.name || "Program Kebaikan Al-Falah";
+      const target = Math.max(0, Number(program.target) || 0);
+      const collected = Math.max(0, Number(program.collected) || 0);
+      const donors = Math.max(0, Number(program.donors) || 0);
+      const progress = target > 0
+        ? Math.min(100, Math.round((collected / target) * 100))
+        : 0;
 
-    visiblePrograms.forEach((program, index) => {
       const article = document.createElement("article");
-      article.className = `program-card${index === 1 ? " featured" : ""}`;
+      article.className = "program-card donation-card";
 
-      const icon = document.createElement("div");
-      icon.className = "program-icon";
-      icon.textContent = "✦";
+      // Foto program
+      const media = document.createElement("div");
+      media.className = "donation-card-media";
 
-      const category = document.createElement("p");
+      if (program.image) {
+        const image = document.createElement("img");
+        image.src = program.image;
+        image.alt = name;
+        image.loading = "lazy";
+        image.decoding = "async";
+
+        image.addEventListener("error", () => {
+          image.remove();
+          media.classList.add("no-image");
+          media.textContent = "Masjid Raya Al-Falah";
+        }, { once: true });
+
+        media.appendChild(image);
+      } else {
+        media.classList.add("no-image");
+        media.textContent = "Masjid Raya Al-Falah";
+      }
+
+      const category = document.createElement("span");
       category.className = "program-type";
-      category.textContent = program.category || "Program Al-Falah";
+      category.textContent = program.category || "Program Kebaikan";
 
       const title = document.createElement("h3");
-      title.textContent = program.name || "Program Masjid";
+      title.textContent = name;
 
       const description = document.createElement("p");
+      description.className = "donation-card-description";
       description.textContent =
         program.description || "Mari bersama mendukung program kebaikan ini.";
 
-      const actions = document.createElement("div");
-      actions.className = "card-actions";
+      const progressSection = document.createElement("div");
+      progressSection.className = "donation-progress";
 
-      const registerButton = document.createElement("button");
-      registerButton.type = "button";
-      registerButton.className = "text-link register-program";
-      registerButton.dataset.program = program.name || "Program Al-Falah";
-      registerButton.textContent = "Daftar program →";
+      const amountRow = document.createElement("div");
+      amountRow.className = "donation-amount-row";
+
+      const collectedBlock = document.createElement("div");
+      const collectedLabel = document.createElement("span");
+      collectedLabel.textContent = "Dana terkumpul";
+      const collectedAmount = document.createElement("strong");
+      collectedAmount.textContent = formatRupiah(collected);
+      collectedBlock.append(collectedLabel, collectedAmount);
+
+      const targetBlock = document.createElement("div");
+      targetBlock.className = "donation-target";
+      const targetLabel = document.createElement("span");
+      targetLabel.textContent = "Target dana";
+      const targetAmount = document.createElement("strong");
+      targetAmount.textContent = target > 0
+        ? formatRupiah(target)
+        : "Belum ditentukan";
+      targetBlock.append(targetLabel, targetAmount);
+
+      amountRow.append(collectedBlock, targetBlock);
+
+      const progressTrack = document.createElement("div");
+      progressTrack.className = "donation-progress-track";
+      progressTrack.setAttribute("role", "progressbar");
+      progressTrack.setAttribute("aria-label", `Progres ${name}`);
+      progressTrack.setAttribute("aria-valuemin", "0");
+      progressTrack.setAttribute("aria-valuemax", "100");
+      progressTrack.setAttribute("aria-valuenow", String(progress));
+
+      const progressBar = document.createElement("div");
+      progressBar.className = "donation-progress-bar";
+      progressBar.style.width = `${progress}%`;
+      progressTrack.appendChild(progressBar);
+
+      const meta = document.createElement("div");
+      meta.className = "donation-card-meta";
+
+      const progressLabel = document.createElement("span");
+      progressLabel.textContent = target > 0
+        ? `${progress}% dari target`
+        : "Target belum ditentukan";
+
+      const donorLabel = document.createElement("span");
+      donorLabel.textContent = `${donors.toLocaleString("id-ID")} donatur`;
+
+      meta.append(progressLabel, donorLabel);
+      progressSection.append(amountRow, progressTrack, meta);
+
+      const actions = document.createElement("div");
+      actions.className = "card-actions donation-card-actions";
 
       const donateButton = document.createElement("button");
       donateButton.type = "button";
-      donateButton.className = "button-quiet open-donation";
-      donateButton.dataset.program = program.name || "Program Al-Falah";
-      donateButton.textContent = "Dukung program";
+      donateButton.className = "button open-donation";
+      donateButton.dataset.program = name;
+      donateButton.textContent = "Donasi Sekarang →";
 
-      actions.append(registerButton, donateButton);
-      article.append(icon, category, title, description, actions);
+      actions.appendChild(donateButton);
+
+      article.append(
+        media,
+        category,
+        title,
+        description,
+        progressSection,
+        actions
+      );
+
       container.appendChild(article);
     });
   } catch (error) {
-    // Jika API gagal, kartu bawaan di HTML tetap ditampilkan.
     console.error("Gagal memuat program dari database:", error);
+    // Konten bawaan HTML tidak dihapus jika API gagal.
   }
 }
 
