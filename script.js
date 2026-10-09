@@ -1,17 +1,76 @@
 
+
+
 const donationModal = document.querySelector("#donation-modal");
 const registrationModal = document.querySelector("#registration-modal");
 
-// ========================================
-// MODAL DONASI
-// ========================================
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest(".open-donation");
+  if (!button) return;
 
-document.querySelectorAll(".open-donation").forEach((button) => {
-  button.addEventListener("click", () => {
-    donationModal?.showModal();
-  });
+  const programInput = document.querySelector("#donation-program");
+  const formStep = document.querySelector("#donation-form-step");
+  const paymentStep = document.querySelector("#donation-payment-step");
+  const successStep = document.querySelector("#donation-success-step");
+  const errorBox = document.querySelector("#donation-submit-error");
+  const updateButton = document.querySelector("#update-donation-button");
+
+  if (!programInput) {
+    alert("Kolom program sedekah belum tersedia.");
+    return;
+  }
+
+  // Tombol pada kartu program membawa nama program.
+  let selectedProgram = button.dataset.program || "";
+
+  // Jika tombol berasal dari hero/header, cari program aktif pertama.
+  if (!selectedProgram) {
+    try {
+      const response = await fetch("/api/program");
+      if (!response.ok) throw new Error("Gagal mengambil daftar program.");
+
+      const result = await response.json();
+      const programs = Array.isArray(result)
+        ? result
+        : result.programs || [];
+
+      const activePrograms = programs.filter(
+        (program) =>
+          program.status !== "draft" &&
+          program.status !== "inactive"
+      );
+
+      selectedProgram = activePrograms[0]?.name || "";
+    } catch (error) {
+      console.error("Gagal memuat program sedekah:", error);
+    }
+  }
+
+  if (!selectedProgram) {
+    alert("Belum ada program sedekah aktif. Silakan coba lagi nanti.");
+    return;
+  }
+
+  programInput.value = selectedProgram;
+
+  formStep.hidden = false;
+  paymentStep.hidden = true;
+  successStep.hidden = true;
+  errorBox.hidden = true;
+
+  const form = document.querySelector("#donation-form");
+  form?.reset();
+
+  // Isi kembali nama program setelah formulir di-reset.
+  programInput.value = selectedProgram;
+
+  if (updateButton) {
+    updateButton.disabled = false;
+    updateButton.textContent = "Update Sedekah";
+  }
+
+  donationModal?.showModal();
 });
-
 // ========================================
 // PENDAFTARAN PROGRAM
 // ========================================
@@ -67,6 +126,158 @@ document.querySelector(".copy-button")?.addEventListener("click", async (event) 
   setTimeout(() => {
     button.textContent = "Salin nomor rekening";
   }, 2000);
+});
+
+
+/* ========================================
+   ALUR DONASI
+======================================== */
+
+let pendingDonation = null;
+
+const donationForm = document.querySelector("#donation-form");
+const customAmountInput = document.querySelector("#donation-custom-amount");
+const paymentStep = document.querySelector("#donation-payment-step");
+const successStep = document.querySelector("#donation-success-step");
+const formStep = document.querySelector("#donation-form-step");
+const updateDonationButton = document.querySelector("#update-donation-button");
+const donationError = document.querySelector("#donation-submit-error");
+
+const formatDonationRupiah = (amount) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0
+  }).format(amount);
+
+// Jika nominal pilihan ditekan, kosongkan nominal custom.
+document.querySelectorAll('input[name="nominal"]').forEach((input) => {
+  input.addEventListener("change", () => {
+    if (input.checked && customAmountInput) {
+      customAmountInput.value = "";
+    }
+  });
+});
+
+// Jika nominal custom diisi, batalkan pilihan nominal tetap.
+customAmountInput?.addEventListener("input", () => {
+  if (customAmountInput.value) {
+    document.querySelectorAll('input[name="nominal"]').forEach((input) => {
+      input.checked = false;
+    });
+  }
+});
+
+// Tahap 1: validasi data dan tampilkan cara pembayaran.
+donationForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(donationForm);
+  const selectedNominal = formData.get("nominal");
+  const customNominal = customAmountInput?.value;
+
+  const amount = customNominal
+    ? Number(customNominal)
+    : Number(selectedNominal);
+
+  const name = String(formData.get("nama") || "").trim();
+  const whatsapp = String(formData.get("whatsapp") || "").trim();
+  const program = String(formData.get("program") || "").trim();
+
+  if (!program) {
+    alert("Pilih program sedekah terlebih dahulu.");
+    return;
+  }
+
+  if (!name || !whatsapp) {
+    alert("Nama dan nomor WhatsApp wajib diisi.");
+    return;
+  }
+
+  if (!Number.isSafeInteger(amount) || amount < 5000) {
+    alert("Nominal sedekah minimal Rp5.000.");
+    return;
+  }
+
+  pendingDonation = {
+    name,
+    whatsapp,
+    program,
+    amount
+  };
+
+  document.querySelector("#donation-payment-amount").textContent =
+    formatDonationRupiah(amount);
+
+  formStep.hidden = true;
+  paymentStep.hidden = false;
+  successStep.hidden = true;
+  donationError.hidden = true;
+});
+
+// Tahap 2: simpan laporan sedekah melalui API backend.
+updateDonationButton?.addEventListener("click", async () => {
+  if (!pendingDonation) {
+    donationError.textContent = "Silakan isi formulir sedekah terlebih dahulu.";
+    donationError.hidden = false;
+    return;
+  }
+
+  updateDonationButton.disabled = true;
+  updateDonationButton.textContent = "Menyimpan sedekah...";
+  donationError.hidden = true;
+
+  try {
+    const response = await fetch("/api/donation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify(pendingDonation)
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error || "Sedekah belum berhasil disimpan. Silakan coba lagi."
+      );
+    }
+
+    // Tampilkan ucapan hanya setelah server menyatakan penyimpanan berhasil.
+    paymentStep.hidden = true;
+    successStep.hidden = false;
+
+    const adminButton = document.querySelector("#donation-admin-whatsapp");
+    const adminMessage = [
+      "Assalamu'alaikum Admin Baitul Maal Al-Falah.",
+      "Saya telah mengisi laporan sedekah melalui website.",
+      "",
+      `Nama: ${pendingDonation.name}`,
+      `Program: ${pendingDonation.program}`,
+      `Nominal: ${formatDonationRupiah(pendingDonation.amount)}`,
+      "",
+      "Mohon informasi jika diperlukan. Terima kasih."
+    ].join("\n");
+
+    if (adminButton) {
+      adminButton.href =
+        `https://wa.me/6287854429107?text=${encodeURIComponent(adminMessage)}`;
+    }
+
+    // Perbarui kartu program agar total terbaru dapat terlihat.
+    if (typeof loadPrograms === "function") {
+      await loadPrograms();
+    }
+  } catch (error) {
+    donationError.textContent =
+      error.message || "Terjadi kesalahan saat menyimpan sedekah.";
+    donationError.hidden = false;
+  } finally {
+    updateDonationButton.disabled = false;
+    updateDonationButton.textContent = "Update Sedekah";
+  }
 });
 
 // ========================================

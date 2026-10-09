@@ -372,94 +372,145 @@
       </div>
     </footer>
 
-    <!-- DONATION MODAL -->
-    <dialog
-      class="modal"
-      id="donation-modal"
-      aria-labelledby="donation-title"
-    >
-      <div class="modal-inner">
+    
+<!-- DONATION MODAL -->
+<dialog class="modal" id="donation-modal" aria-labelledby="donation-title">
+  <div class="modal-inner">
+    <button class="modal-close" type="button" aria-label="Tutup">×</button>
 
-        <button
-          class="modal-close"
-          aria-label="Tutup"
-        >
-          ×
+    <p class="eyebrow">Infaq & donasi</p>
+    <h2 id="donation-title">Salurkan Sedekah Anda</h2>
+
+    <!-- LANGKAH 1: DATA DONATUR -->
+    <section id="donation-form-step">
+      <p class="modal-intro">
+        Isi data berikut untuk melanjutkan sedekah.
+      </p>
+
+      <form id="donation-form">
+        <label>
+          Program Sedekah
+          <input id="donation-program" name="program" required readonly
+            placeholder="Pilih program" />
+        </label>
+
+        <label>
+          Nama lengkap
+          <input name="nama" required maxlength="100"
+            placeholder="Nama Anda" />
+        </label>
+
+        <label>
+          Nomor WhatsApp
+          <input name="whatsapp" required type="tel" inputmode="tel"
+            maxlength="20" placeholder="08xxxxxxxxxx" />
+        </label>
+
+        <fieldset class="donation-amount-field">
+          <legend>Nominal sedekah</legend>
+
+          <label>
+            <input type="radio" name="nominal" value="5000" />
+            Rp5.000
+          </label>
+
+          <label>
+            <input type="radio" name="nominal" value="10000" />
+            Rp10.000
+          </label>
+
+          <label>
+            <input type="radio" name="nominal" value="50000" />
+            Rp50.000
+          </label>
+
+          <label>
+            <input type="radio" name="nominal" value="100000" />
+            Rp100.000
+          </label>
+
+          <label>
+            Nominal lainnya (minimal Rp5.000)
+            <input id="donation-custom-amount" type="number"
+              min="5000" step="1000" inputmode="numeric"
+              placeholder="Masukkan nominal sendiri" />
+          </label>
+        </fieldset>
+
+        <button class="button button-full" type="submit">
+          Sedekah
         </button>
+      </form>
+    </section>
 
-        <p class="eyebrow">Infaq & donasi</p>
+    <!-- LANGKAH 2: PEMBAYARAN -->
+    <section id="donation-payment-step" hidden>
+      <p class="modal-intro">
+        Silakan transfer sesuai nominal sedekah yang Anda pilih.
+      </p>
 
-        <h2 id="donation-title">
-          Pilih cara berbagi
-        </h2>
+      <p><strong>Nominal sedekah:</strong>
+        <span id="donation-payment-amount"></span>
+      </p>
 
-        <p class="modal-intro">
-          Setiap kontribusi Anda berarti bagi program-program Al-Falah.
-        </p>
+      <div class="payment-options">
+        <section class="payment-option">
+          <h3>Scan QRIS</h3>
+          <p>Gunakan aplikasi pembayaran pilihan Anda.</p>
 
-        <div class="payment-options">
+          <img class="qris" src="assets/qris-alfalah.png"
+            alt="QRIS donasi Masjid Raya Al-Falah Sragen" />
 
-          <!-- QRIS -->
-          <section class="payment-option">
-            <h3>Scan QRIS</h3>
+          <a class="button button-full" href="assets/qris-alfalah.png"
+            target="_blank" rel="noopener noreferrer">
+            Buka QRIS
+          </a>
+        </section>
 
-            <p>
-              Praktis melalui aplikasi pembayaran pilihan Anda.
-            </p>
+        <section class="payment-option">
+          <h3>Transfer BSI</h3>
+          <p class="bank-number">445 482 9190</p>
+          <p>a.n. Tamir Masjid Raya Al Falah</p>
 
-            <img
-              class="qris"
-              src="assets/qris-alfalah.png"
-              alt="QRIS donasi Masjid Raya Al-Falah Sragen"
-            />
-
-            <a
-              class="button button-full"
-              href="assets/qris-alfalah.png"
-              target="_blank"
-            >
-              Buka QRIS
-            </a>
-          </section>
-
-          <!-- TRANSFER BSI -->
-          <section class="payment-option">
-            <h3>Transfer BSI</h3>
-
-            <p class="bank-number">
-              445 482 9190
-            </p>
-
-            <p>
-              a.n. Tamir Masjid Raya Al Falah
-            </p>
-
-            <button
-              class="copy-button"
-              data-copy="4454829190"
-            >
-              Salin nomor rekening
-            </button>
-          </section>
-
-          
-
-        </div>
-
-        <p class="modal-note">
-          Konfirmasi atau pertanyaan donasi:
-
-          <a
-            href="https://wa.me/6287854429107"
-            target="_blank"
-            rel="noreferrer"
-          >
-            WhatsApp Admin Masjid Raya Al-Falah
-          </a>.
-        </p>
-
+          <button class="copy-button" type="button"
+            data-copy="4454829190">
+            Salin nomor rekening
+          </button>
+        </section>
       </div>
-    </dialog>
+
+      <p class="modal-note">
+        Setelah melakukan pembayaran, tekan tombol berikut untuk
+        mencatat sedekah Anda.
+      </p>
+
+      <p id="donation-submit-error" role="alert" hidden></p>
+
+      <button class="button button-full" id="update-donation-button"
+        type="button">
+        Update Sedekah
+      </button>
+    </section>
+
+    <!-- LANGKAH 3: UCAPAN SUKSES -->
+    <section id="donation-success-step" hidden>
+      <h3>Jazakumullahu khairan katsiran!</h3>
+
+      <p>
+        Sedekah anda sudah masuk, jazakumullahu khairan katsiran.
+        semoga Allah berikan kemudahan, dan kelancaran, serta berkah
+        wasilah sedekah yang anda tunaikan. aamiin.
+      </p>
+
+      <a id="donation-admin-whatsapp"
+        class="button button-full"
+        href="https://wa.me/6287854429107"
+        target="_blank" rel="noopener noreferrer">
+        Hubungi Admin via WhatsApp
+      </a>
+    </section>
+  </div>
+</dialog>
 
     <!-- REGISTRATION MODAL -->
     <dialog
