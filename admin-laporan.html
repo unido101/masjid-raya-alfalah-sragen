@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Admin Laporan — Masjid Raya Al-Falah</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f4;
+      color: #1d3328;
+    }
+    header {
+      background: #174b35;
+      color: white;
+      padding: 22px 5%;
+    }
+    header h1 { margin: 0 0 6px; font-size: 23px; }
+    header p { margin: 0; opacity: .85; }
+    main { max-width: 1000px; margin: 28px auto; padding: 0 18px; }
+    .panel {
+      background: white;
+      border: 1px solid #e1e8e2;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; font-size: 19px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .full { grid-column: 1 / -1; }
+    label { font-size: 14px; font-weight: 700; }
+    input, textarea, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ccd8ce;
+      border-radius: 8px;
+      font: inherit;
+      background: white;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    button:disabled { opacity: .55; cursor: wait; }
+    .primary { background: #176440; color: white; }
+    .secondary { background: #e9f0eb; color: #174b35; }
+    .danger { background: #fee9e7; color: #a32920; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+    .report {
+      padding: 16px 0;
+      border-bottom: 1px solid #e6ece7;
+    }
+    .report:last-child { border-bottom: 0; }
+    .report h3 { margin: 0 0 8px; }
+    .report p { margin: 5px 0; color: #53645a; line-height: 1.5; }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #edf2ee;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .notice { font-size: 14px; line-height: 1.5; }
+    .error { color: #a32920; }
+    .success { color: #176440; }
+    .muted { color: #64746a; }
+    [hidden] { display: none !important; }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .panel { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Laporan</h1>
+    <p>Masjid Raya Al-Falah Sragen</p>
+  </header>
+
+  <main>
+    <section class="panel" id="login-panel">
+      <h2>Akses administrator</h2>
+      <p class="notice muted">
+        Masukkan token admin yang sama dengan ADMIN_TOKEN di Vercel.
+        Token hanya disimpan di memori halaman ini.
+      </p>
+      <form id="login-form">
+        <div class="field">
+          <label for="admin-token">Token admin</label>
+          <input id="admin-token" type="password" autocomplete="off" required>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">Masuk</button>
+        </div>
+      </form>
+      <p id="login-message" class="notice" role="status"></p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="panel">
+        <h2 id="form-heading">Tambah laporan baru</h2>
+        <form id="report-form">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="title">Judul laporan *</label>
+              <input id="title" maxlength="150" required>
+            </div>
+
+            <div class="field">
+              <label for="period">Periode laporan</label>
+              <input id="period" maxlength="100" placeholder="Contoh: September 2026">
+            </div>
+
+            <div class="field">
+              <label for="status">Status publikasi</label>
+              <select id="status">
+                <option value="draft">Draf — belum tampil ke publik</option>
+                <option value="published">Publikasikan</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="penerimaan">Total penerimaan (Rp)</label>
+              <input id="penerimaan" type="number" min="0" step="1" value="0" required>
+            </div>
+
+            <div class="field">
+              <label for="penyaluran">Total penyaluran (Rp)</label>
+              <input id="penyaluran" type="number" min="0" step="1" value="0" required>
+            </div>
+
+            <div class="field full">
+              <label for="summary">Ringkasan laporan</label>
+              <textarea id="summary" maxlength="2000" placeholder="Tuliskan ringkasan penerimaan, penyaluran, dan kegiatan."></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="save-button" type="submit">Simpan laporan</button>
+            <button class="secondary" id="cancel-edit" type="button" hidden>Batal edit</button>
+            <button class="secondary" id="refresh-button" type="button">Muat ulang</button>
+            <button class="danger" id="logout-button" type="button">Keluar</button>
+          </div>
+          <p id="form-message" class="notice" role="status"></p>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Daftar laporan</h2>
+        <p class="muted notice">Draf hanya terlihat oleh admin. Laporan terbit tersedia melalui API publik.</p>
+        <div id="report-list" aria-live="polite">Memuat laporan...</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = (selector) => document.querySelector(selector);
+      let adminToken = "";
+      let editingId = null;
+
+      const loginPanel = $("#login-panel");
+      const dashboard = $("#dashboard");
+      const loginMessage = $("#login-message");
+      const formMessage = $("#form-message");
+      const reportList = $("#report-list");
+
+      function setMessage(element, message, type = "") {
+        element.textContent = message;
+        element.className = "notice " + type;
+      }
+
+      async function apiRequest(method, id, body) {
+        const url = new URL("/api/laporan", window.location.origin);
+        if (id) url.searchParams.set("id", id);
+
+        const options = {
+          method,
+          headers: {
+            "Accept": "application/json",
+            "Authorization": "Bearer " + adminToken
+          },
+          cache: "no-store"
+        };
+
+        if (body !== undefined) {
+          options.headers["Content-Type"] = "application/json";
+          options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(url, options);
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.detail || data.error || "Permintaan gagal (" + response.status + ").");
+        }
+
+        return data;
+      }
+
+      function resetForm() {
+        editingId = null;
+        $("#report-form").reset();
+        $("#penerimaan").value = "0";
+        $("#penyaluran").value = "0";
+        $("#status").value = "draft";
+        $("#form-heading").textContent = "Tambah laporan baru";
+        $("#save-button").textContent = "Simpan laporan";
+        $("#cancel-edit").hidden = true;
+        setMessage(formMessage, "");
+      }
+
+      function addText(parent, tag, text, className) {
+        const element = document.createElement(tag);
+        element.textContent = text || "";
+        if (className) element.className = className;
+        parent.appendChild(element);
+        return element;
+      }
+
+      function formatRupiah(amount) {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0
+        }).format(Number(amount) || 0);
+      }
+
+      function renderReports(reports) {
+        reportList.replaceChildren();
+
+        if (!reports.length) {
+          addText(reportList, "p", "Belum ada laporan.");
+          return;
+        }
+
+        reports.forEach((report) => {
+          const card = document.createElement("article");
+          card.className = "report";
+
+          addText(
+            card,
+            "span",
+            report.status === "published" ? "Terbit" : "Draf",
+            "badge"
+          );
+
+          addText(card, "h3", report.title);
+          addText(card, "p", "Periode: " + (report.period || "-"));
+          addText(card, "p", report.summary || "Tidak ada ringkasan.");
+          addText(card, "p", "Penerimaan: " + formatRupiah(report.penerimaan));
+          addText(card, "p", "Penyaluran: " + formatRupiah(report.penyaluran));
+
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          const editButton = document.createElement("button");
+          editButton.className = "secondary";
+          editButton.textContent = "Edit";
+          editButton.addEventListener("click", () => {
+            editingId = report.id;
+            $("#title").value = report.title || "";
+            $("#period").value = report.period || "";
+            $("#summary").value = report.summary || "";
+            $("#penerimaan").value = Number(report.penerimaan) || 0;
+            $("#penyaluran").value = Number(report.penyaluran) || 0;
+            $("#status").value = report.status || "draft";
+            $("#form-heading").textContent = "Edit laporan";
+            $("#save-button").textContent = "Simpan perubahan";
+            $("#cancel-edit").hidden = false;
+            setMessage(formMessage, "");
+            $("#title").focus();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "danger";
+          deleteButton.textContent = "Hapus";
+          deleteButton.addEventListener("click", async () => {
+            if (!window.confirm('Hapus laporan "' + report.title + '"?')) return;
+
+            deleteButton.disabled = true;
+            try {
+              await apiRequest("DELETE", report.id);
+              await loadReports();
+              setMessage(formMessage, "Laporan berhasil dihapus.", "success");
+              if (editingId === report.id) resetForm();
+            } catch (error) {
+              setMessage(formMessage, error.message, "error");
+              deleteButton.disabled = false;
+            }
+          });
+
+          actions.append(editButton, deleteButton);
+          card.appendChild(actions);
+          reportList.appendChild(card);
+        });
+      }
+
+      async function loadReports() {
+        reportList.textContent = "Memuat laporan...";
+
+        try {
+          const reports = await apiRequest("GET");
+          renderReports(Array.isArray(reports) ? reports : []);
+        } catch (error) {
+          reportList.textContent = "Gagal memuat laporan: " + error.message;
+          throw error;
+        }
+      }
+
+      $("#login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        adminToken = $("#admin-token").value.trim();
+
+        if (!adminToken) return;
+
+        const button = event.currentTarget.querySelector('button[type="submit"]');
+        button.disabled = true;
+        setMessage(loginMessage, "Memeriksa akses...");
+
+        try {
+          await loadReports();
+          loginPanel.hidden = true;
+          dashboard.hidden = false;
+          $("#admin-token").value = "";
+          setMessage(loginMessage, "");
+        } catch (error) {
+          adminToken = "";
+          setMessage(loginMessage, "Gagal masuk: " + error.message, "error");
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $("#report-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const payload = {
+          title: $("#title").value.trim(),
+          period: $("#period").value.trim(),
+          summary: $("#summary").value.trim(),
+          penerimaan: Number($("#penerimaan").value),
+          penyaluran: Number($("#penyaluran").value),
+          status: $("#status").value
+        };
+
+        if (
+          !payload.title ||
+          !Number.isFinite(payload.penerimaan) ||
+          payload.penerimaan < 0 ||
+          !Number.isFinite(payload.penyaluran) ||
+          payload.penyaluran < 0
+        ) {
+          setMessage(formMessage, "Periksa judul dan nominal laporan.", "error");
+          return;
+        }
+
+        const button = $("#save-button");
+        button.disabled = true;
+
+        try {
+          await apiRequest(editingId ? "PUT" : "POST", editingId, payload);
+          resetForm();
+          await loadReports();
+          setMessage(formMessage, "Laporan berhasil disimpan.", "success");
+        } catch (error) {
+          setMessage(formMessage, error.message, "error");
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $("#cancel-edit").addEventListener("click", resetForm);
+
+      $("#refresh-button").addEventListener("click", async () => {
+        try {
+          await loadReports();
+          setMessage(formMessage, "Daftar laporan diperbarui.", "success");
+        } catch (error) {
+          setMessage(formMessage, error.message, "error");
+        }
+      });
+
+      $("#logout-button").addEventListener("click", () => {
+        adminToken = "";
+        editingId = null;
+        dashboard.hidden = true;
+        loginPanel.hidden = false;
+        reportList.replaceChildren();
+        resetForm();
+        setMessage(loginMessage, "Kamu sudah keluar.");
+      });
+    })();
+  </script>
+</body>
+</html>

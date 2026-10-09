@@ -78,10 +78,18 @@ export default async function handler(request, response) {
   try {
     const collection = await getCollection();
 
-    // GET: hanya laporan yang sudah dipublikasikan.
+
+    // GET: admin dapat melihat semua laporan,
+    // pengunjung publik hanya melihat laporan terbit.
     if (request.method === "GET") {
+      const admin = isAdmin(request);
+
+      const filter = admin
+        ? {}
+        : { status: "published" };
+
       const reports = await collection
-        .find({ status: "published" })
+        .find(filter)
         .sort({ createdAt: -1 })
         .limit(100)
         .toArray();
