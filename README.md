@@ -1,20 +1,39 @@
+
 # Masjid Raya Al-Falah Sragen — Web Publik
 
-Situs statis untuk informasi program jamaah, donasi QRIS/transfer, pendaftaran via WhatsApp, dan laporan publik.
+Website publik Masjid Raya Al-Falah Sragen untuk informasi program jamaah, donasi melalui QRIS dan transfer bank, pendaftaran program melalui WhatsApp, serta laporan publik.
+
+## Teknologi
+
+- HTML, CSS, dan JavaScript
+- MongoDB Atlas untuk data program
+- Vercel untuk hosting dan API
+- WhatsApp untuk pendaftaran program
 
 ## Deploy ke Vercel
 
-1. Buat repository GitHub baru, misalnya `masjid-raya-alfalah-public`.
-2. Unggah seluruh isi folder ini ke repository tersebut.
-3. Di Vercel pilih **Add New → Project**, lalu import repository baru.
-4. Biarkan pengaturan build kosong / framework **Other**, lalu klik **Deploy**.
+1. Hubungkan repository GitHub ke Vercel.
+2. Gunakan framework preset `Other`.
+3. Pastikan dependency terpasang melalui `package.json`.
+4. Atur environment variables yang dibutuhkan di Vercel.
+5. Deploy dan uji endpoint API.
 
-## iPaymu
+## Environment Variables
 
-Checkout iPaymu dijalankan oleh endpoint serverless `/api/ipaymu`, sehingga API key tidak pernah dikirim ke browser. Tambahkan Environment Variables berikut di Vercel (Production dan Preview):
+- `MONGODB_URI`: URI koneksi MongoDB Atlas.
+- `MONGODB_DB`: nama database, default `alfalah`.
+- `ADMIN_TOKEN`: token otorisasi untuk pengelolaan data melalui API admin.
 
-- `IPAYMU_VA`: nomor VA iPaymu.
-- `IPAYMU_API_KEY`: API Key iPaymu.
-- `IPAYMU_BASE_URL` (opsional): endpoint iPaymu; secara bawaan memakai `https://my.ipaymu.com/api/v2/payment`.
+Jangan menyimpan kredensial atau token rahasia di dalam kode frontend maupun repository publik.
 
-Gunakan kredensial sandbox dan isi `IPAYMU_BASE_URL` dengan endpoint sandbox iPaymu saat pengujian. Setelah kredensial ditambahkan, lakukan redeploy.
+## Metode Donasi
+
+Website menyediakan informasi donasi melalui QRIS dan transfer bank. Integrasi pembayaran iPaymu tidak digunakan.
+
+## Fitur Website
+
+- Informasi program masjid.
+- Pengambilan data program melalui API.
+- Donasi melalui QRIS dan transfer bank.
+- Pendaftaran program melalui WhatsApp.
+- Bagian laporan publik.
