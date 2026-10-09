@@ -844,26 +844,55 @@ setUploadStatus("Belum ada foto baru yang dipilih.");
         }
       }
 
-      function editProgram(program) {
-        $("#programId").value = program.id;
-        $("#name").value = program.name || "";
-        $("#category").value = program.category || "";
-        $("#description").value = program.description || "";
-        $("#image").value = program.image || "";
-        photoFileInput.value = "";
-showImagePreview(program.image || "");
-setUploadStatus("Foto saat ini dimuat. Pilih foto baru jika ingin menggantinya.");
-        $("#target").value = Number(program.target) || 0;
-        $("#collected").value = Number(program.collected) || 0;
-        $("#donors").value = Number(program.donors) || 0;
-        $("#status").value = program.status || "active";
-        $("#formTitle").textContent = "Edit program donasi";
-        $("#formEyebrow").textContent = "Perbarui program";
-        $("#saveBtn").textContent = "Simpan perubahan";
-        $("#cancelEditBtn").hidden = false;
-        hideNotice($("#formNotice"));
-        $("#editor").scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+     
+function editProgram(program) {
+  const setValue = (selector, value) => {
+    const element = $(selector);
+
+    if (!element) {
+      throw new Error(
+        `Elemen ${selector} tidak ditemukan di HTML. Periksa ID elemen tersebut.`
+      );
+    }
+
+    element.value = value;
+  };
+
+  setValue("#programId", program.id ?? "");
+  setValue("#name", program.name || "");
+  setValue("#category", program.category || "");
+  setValue("#description", program.description || "");
+  setValue("#image", program.image || "");
+  setValue("#target", Number(program.target) || 0);
+  setValue("#collected", Number(program.collected) || 0);
+  setValue("#donors", Number(program.donors) || 0);
+  setValue("#status", program.status || "active");
+
+  if (photoFileInput) {
+    photoFileInput.value = "";
+  }
+
+  if (typeof showImagePreview === "function") {
+    showImagePreview(program.image || "");
+  }
+
+  if (typeof setUploadStatus === "function" && uploadStatus) {
+    setUploadStatus(
+      "Foto saat ini dimuat. Pilih foto baru jika ingin menggantinya."
+    );
+  }
+
+  $("#formTitle").textContent = "Edit program donasi";
+  $("#formEyebrow").textContent = "Perbarui program";
+  $("#saveBtn").textContent = "Simpan perubahan";
+  $("#cancelEditBtn").hidden = false;
+
+  hideNotice($("#formNotice"));
+  $("#editor").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
 
       function getFormData() {
         const positiveInteger = (id) => {
