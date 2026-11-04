@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
-const DB_NAME = "alfalah";
+const DB_NAME = process.env.MONGODB_DB || "alfalah";
 
 let cachedClient = globalThis.mongoClient || null;
 
