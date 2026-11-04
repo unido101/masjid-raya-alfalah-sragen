@@ -1,22 +1,23 @@
 
-const { MongoClient } = require("mongodb");
+import { MongoClient } from "mongodb";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 const DB_NAME = "alfalah";
 
-let cachedClient = global.mongoClient || null;
+let cachedClient = globalThis.mongoClient || null;
 
 async function getDb() {
   if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI belum diatur");
+    throw new Error("MONGODB_URI belum diatur di Vercel");
   }
 
   if (!cachedClient) {
     const client = new MongoClient(MONGODB_URI);
     await client.connect();
+
     cachedClient = client;
-    global.mongoClient = client;
+    globalThis.mongoClient = client;
   }
 
   return cachedClient.db(DB_NAME);
@@ -26,12 +27,14 @@ function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Mengubah tanggal YYYY-MM-DD menjadi awal hari WIB.
 function startOfWibDay(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
 
   const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day) - 7 * 60 * 60 * 1000);
+
+  const date = new Date(
+    Date.UTC(year, month - 1, day) - 7 * 60 * 60 * 1000
+  );
 
   if (
     date.getUTCFullYear() !== year ||
@@ -47,6 +50,7 @@ function startOfWibDay(value) {
 function getTodayWibStart() {
   const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
   now.setUTCHours(0, 0, 0, 0);
+
   return new Date(now.getTime() - 7 * 60 * 60 * 1000);
 }
 
@@ -55,16 +59,22 @@ function getDateFilter(query) {
 
   if (query.from) {
     const from = startOfWibDay(query.from);
-    if (!from) throw new Error("Format tanggal mulai tidak valid");
+
+    if (!from) {
+      throw new Error("Format tanggal mulai tidak valid");
+    }
+
     filter.$gte = from;
   }
 
   if (query.to) {
     const to = startOfWibDay(query.to);
-    if (!to) throw new Error("Format tanggal akhir tidak valid");
 
-    const exclusiveEnd = new Date(to.getTime() + 24 * 60 * 60 * 1000);
-    filter.$lt = exclusiveEnd;
+    if (!to) {
+      throw new Error("Format tanggal akhir tidak valid");
+    }
+
+    filter.$lt = new Date(to.getTime() + 24 * 60 * 60 * 1000);
   }
 
   return Object.keys(filter).length ? filter : null;
@@ -74,7 +84,9 @@ function buildDonationFilter(query) {
   const filter = {};
   const dateFilter = getDateFilter(query);
 
-  if (dateFilter) filter.createdAt = dateFilter;
+  if (dateFilter) {
+    filter.createdAt = dateFilter;
+  }
 
   if (query.program) {
     filter.program = {
@@ -104,8 +116,9 @@ function donorKeyExpression() {
   return {
     $cond: [
       {
-        $and: [
-          { $ne: [{ $ifNull: ["$whatsapp", ""] }, ""] },
+        $ne: [
+          { $ifNull: ["$whatsapp", ""] },
+          "",
         ],
       },
       "$whatsapp",
@@ -119,7 +132,7 @@ function donorKeyExpression() {
   };
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
@@ -138,12 +151,14 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  const token = (req.headers.authorization || "")
+    .replace(/^Bearer\s+/i, "")
+    .trim();
 
   if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
     return res.status(401).json({
       success: false,
-      message: "Akses ditolak. Silakan login sebagai admin.",
+      message: "Akses ditolak. Periksa Admin Token.",
     });
   }
 
@@ -159,17 +174,22 @@ module.exports = async function handler(req, res) {
 
       const [total, nominal, today, donorCount] = await Promise.all([
         donations.countDocuments({}),
+
         donations.aggregate([
           {
             $group: {
               _id: null,
-              total: { $sum: { $ifNull: ["$amount", 0] } },
+              total: {
+                $sum: { $ifNull: ["$amount", 0] },
+              },
             },
           },
         ]).toArray(),
+
         donations.countDocuments({
           createdAt: { $gte: todayStart },
         }),
+
         donations.aggregate([
           { $group: { _id: donorKeyExpression() } },
           { $count: "total" },
@@ -184,21 +204,24 @@ module.exports = async function handler(req, res) {
           reportsToday: today,
           uniqueDonors: donorCount[0]?.total || 0,
         },
-        note: "Nominal merupakan laporan sedekah dari donatur, belum diverifikasi.",
+        note: "Nominal merupakan laporan donasi dan belum diverifikasi.",
       });
     }
 
     // DAFTAR LAPORAN DONASI
     if (view === "donations") {
       const filter = buildDonationFilter(query);
+
       const page = Math.max(1, parseInt(query.page, 10) || 1);
-      const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 20));
-      const skip = (page - 1) * limit;
+      const limit = Math.min(
+        100,
+        Math.max(1, parseInt(query.limit, 10) || 20)
+      );
 
       const [items, total] = await Promise.all([
         donations.find(filter)
           .sort({ createdAt: -1 })
-          .skip(skip)
+          .skip((page - 1) * limit)
           .limit(limit)
           .project({
             name: 1,
@@ -209,6 +232,7 @@ module.exports = async function handler(req, res) {
             createdAt: 1,
           })
           .toArray(),
+
         donations.countDocuments(filter),
       ]);
 
@@ -231,14 +255,17 @@ module.exports = async function handler(req, res) {
 
       const pipeline = [
         { $match: filter },
+
         {
           $group: {
             _id: donorKeyExpression(),
             name: { $last: "$name" },
             whatsapp: { $last: "$whatsapp" },
+
             totalReportedAmount: {
               $sum: { $ifNull: ["$amount", 0] },
             },
+
             donationCount: { $sum: 1 },
             lastDonation: { $max: "$createdAt" },
             programs: { $addToSet: "$program" },
@@ -248,6 +275,7 @@ module.exports = async function handler(req, res) {
 
       if (query.search) {
         const search = escapeRegex(query.search);
+
         pipeline.push({
           $match: {
             $or: [
@@ -259,7 +287,10 @@ module.exports = async function handler(req, res) {
       }
 
       const page = Math.max(1, parseInt(query.page, 10) || 1);
-      const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 20));
+      const limit = Math.min(
+        100,
+        Math.max(1, parseInt(query.limit, 10) || 20)
+      );
 
       const [items, countResult] = await Promise.all([
         donations.aggregate([
@@ -268,6 +299,7 @@ module.exports = async function handler(req, res) {
           { $skip: (page - 1) * limit },
           { $limit: limit },
         ]).toArray(),
+
         donations.aggregate([
           ...pipeline,
           { $count: "total" },
@@ -341,4 +373,4 @@ module.exports = async function handler(req, res) {
       message: error.message || "Terjadi kesalahan pada server",
     });
   }
-};
+}
