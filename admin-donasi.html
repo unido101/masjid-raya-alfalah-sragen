@@ -1,0 +1,950 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Donasi | Baitul Maal Al-Falah</title>
+
+  <style>
+    :root {
+      --primary: #087b55;
+      --primary-dark: #075d42;
+      --bg: #f4f7f6;
+      --text: #1d2924;
+      --muted: #718078;
+      --border: #e5ebe7;
+      --white: #ffffff;
+      --danger: #dc3545;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button, input, select { font: inherit; }
+
+    .container {
+      max-width: 1440px;
+      margin: auto;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .brand h1 {
+      font-size: 24px;
+      margin: 0 0 6px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .logout {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 9px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      background: white;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-size: 25px;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: #e8f5ef;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    .panel-content { padding: 20px; }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      color: var(--text);
+    }
+
+    .search { flex: 1; min-width: 190px; }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 15px;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .btn:hover { background: var(--primary-dark); }
+
+    .btn.secondary {
+      background: #edf2ef;
+      color: var(--text);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 750px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 650;
+      background: #fafcfb;
+      white-space: nowrap;
+    }
+
+    td strong { font-size: 13px; }
+
+    .muted { color: var(--muted); }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #fff4df;
+      color: #9a6500;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .action {
+      border: 0;
+      background: #e8f5ef;
+      color: var(--primary-dark);
+      padding: 7px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pagination-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .empty, .loading, .error {
+      padding: 40px 15px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .error { color: var(--danger); }
+
+    .notice {
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      border-radius: 9px;
+      background: #fff7e8;
+      color: #795b20;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .detail-header h2 { margin: 0 0 6px; }
+
+    .detail-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .detail-stat {
+      background: #f7faf8;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .detail-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .detail-stat strong { font-size: 18px; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: white;
+      width: 100%;
+      max-width: 390px;
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 35px rgba(0,0,0,.05);
+    }
+
+    .login-card h2 { margin-top: 0; }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+
+    .login-card button { width: 100%; }
+
+    .login-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 850px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .container { padding: 16px; }
+      .stats { gap: 10px; }
+      .stat { padding: 15px; }
+      .stat-value { font-size: 19px; }
+      .brand h1 { font-size: 20px; }
+      .panel-content { padding: 14px; }
+      .detail-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h2>Admin Donasi</h2>
+      <p>Baitul Maal Masjid Raya Al-Falah Sragen</p>
+
+      <form id="loginForm">
+        <input
+          id="tokenInput"
+          type="password"
+          placeholder="Masukkan Admin Token"
+          autocomplete="current-password"
+          required
+        >
+        <button class="btn" type="submit">Masuk Dashboard</button>
+      </form>
+
+      <div id="loginError" class="login-error"></div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <main id="dashboard" class="hidden">
+    <div class="container">
+
+      <header class="topbar">
+        <div class="brand">
+          <h1>Manajemen Donasi</h1>
+          <p>Baitul Maal Masjid Raya Al-Falah Sragen</p>
+        </div>
+
+        <button class="logout" id="logoutBtn">Keluar</button>
+      </header>
+
+      <div class="notice">
+        Perhatian: nominal yang ditampilkan merupakan laporan sedekah dari donatur.
+        Data ini belum berarti dana telah diverifikasi atau diterima.
+      </div>
+
+      <!-- SUMMARY -->
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-label">Total Laporan Donasi</div>
+          <div class="stat-value" id="totalReports">-</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Total Nominal Dilaporkan</div>
+          <div class="stat-value" id="totalAmount">-</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Jumlah Donatur</div>
+          <div class="stat-value" id="totalDonors">-</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Laporan Hari Ini</div>
+          <div class="stat-value" id="reportsToday">-</div>
+        </div>
+      </section>
+
+      <!-- MAIN PANEL -->
+      <section class="panel">
+
+        <nav class="tabs">
+          <button class="tab active" data-tab="donations">Laporan Donasi</button>
+          <button class="tab" data-tab="donors">Database Donatur</button>
+        </nav>
+
+        <div class="panel-content">
+
+          <!-- DONATION VIEW -->
+          <section id="donationsView">
+            <div class="toolbar">
+              <input
+                class="search"
+                id="donationSearch"
+                placeholder="Cari nama, WhatsApp, atau program..."
+              >
+
+              <input type="date" id="dateFrom" title="Dari tanggal">
+              <input type="date" id="dateTo" title="Sampai tanggal">
+
+              <button class="btn" id="searchDonations">Cari</button>
+              <button class="btn secondary" id="resetDonations">Reset</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Donatur</th>
+                    <th>WhatsApp</th>
+                    <th>Program</th>
+                    <th>Nominal</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="donationsTable">
+                  <tr><td colspan="6" class="loading">Memuat data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <span id="donationPaginationInfo">-</span>
+              <div class="pagination-buttons">
+                <button class="btn secondary" id="donationPrev">Sebelumnya</button>
+                <button class="btn secondary" id="donationNext">Berikutnya</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- DONOR VIEW -->
+          <section id="donorsView" class="hidden">
+            <div class="toolbar">
+              <input
+                class="search"
+                id="donorSearch"
+                placeholder="Cari nama atau nomor WhatsApp..."
+              >
+              <button class="btn" id="searchDonors">Cari Donatur</button>
+              <button class="btn secondary" id="resetDonors">Reset</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama Donatur</th>
+                    <th>WhatsApp</th>
+                    <th>Jumlah Transaksi</th>
+                    <th>Total Dilaporkan</th>
+                    <th>Donasi Terakhir</th>
+                    <th>Detail</th>
+                  </tr>
+                </thead>
+                <tbody id="donorsTable">
+                  <tr><td colspan="6" class="loading">Memuat data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <span id="donorPaginationInfo">-</span>
+              <div class="pagination-buttons">
+                <button class="btn secondary" id="donorPrev">Sebelumnya</button>
+                <button class="btn secondary" id="donorNext">Berikutnya</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- DONOR DETAIL -->
+          <section id="donorDetailView" class="hidden">
+            <div class="detail-header">
+              <div>
+                <h2 id="detailName">Detail Donatur</h2>
+                <div class="muted" id="detailWhatsapp"></div>
+              </div>
+              <button class="btn secondary" id="backToDonors">Kembali</button>
+            </div>
+
+            <div class="detail-stats">
+              <div class="detail-stat">
+                <span>Total Nominal Dilaporkan</span>
+                <strong id="detailAmount">-</strong>
+              </div>
+              <div class="detail-stat">
+                <span>Jumlah Laporan</span>
+                <strong id="detailCount">-</strong>
+              </div>
+              <div class="detail-stat">
+                <span>Program Diikuti</span>
+                <strong id="detailPrograms">-</strong>
+              </div>
+            </div>
+
+            <h3>Riwayat Donasi</h3>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Program</th>
+                    <th>Nominal</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="donorHistoryTable">
+                  <tr><td colspan="4" class="loading">Memuat riwayat...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <p class="muted" style="font-size:12px;margin-top:18px">
+        Baitul Maal Masjid Raya Al-Falah Sragen · Dashboard internal
+      </p>
+
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "/api/admin-donations";
+    const TOKEN_KEY = "alfalah_admin_token";
+
+    let adminToken = sessionStorage.getItem(TOKEN_KEY) || "";
+    let donationPage = 1;
+    let donorPage = 1;
+    let donationTotalPages = 1;
+    let donorTotalPages = 1;
+    let activeTab = "donations";
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function rupiah(value) {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0
+      }).format(Number(value) || 0);
+    }
+
+    function formatDate(value) {
+      if (!value) return "-";
+
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+
+      return new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Asia/Jakarta"
+      }).format(date);
+    }
+
+    function showLogin() {
+      $("loginScreen").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+    }
+
+    function showDashboard() {
+      $("loginScreen").classList.add("hidden");
+      $("dashboard").classList.remove("hidden");
+    }
+
+    async function apiRequest(params = {}) {
+      const url = new URL(API_URL, window.location.origin);
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          url.searchParams.set(key, value);
+        }
+      });
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${adminToken}`
+        }
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        logout();
+        throw new Error("Sesi admin berakhir. Silakan login kembali.");
+      }
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Gagal mengambil data.");
+      }
+
+      return result;
+    }
+
+    function logout() {
+      sessionStorage.removeItem(TOKEN_KEY);
+      adminToken = "";
+      showLogin();
+    }
+
+    $("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const token = $("tokenInput").value.trim();
+      $("loginError").textContent = "";
+
+      if (!token) return;
+
+      adminToken = token;
+
+      try {
+        await apiRequest({ view: "summary" });
+        sessionStorage.setItem(TOKEN_KEY, token);
+        showDashboard();
+        await loadDashboard();
+      } catch (error) {
+        adminToken = "";
+        $("loginError").textContent = error.message;
+      }
+    });
+
+    $("logoutBtn").addEventListener("click", logout);
+
+    async function loadSummary() {
+      const result = await apiRequest({ view: "summary" });
+      const data = result.data || {};
+
+      $("totalReports").textContent =
+        Number(data.totalReports || 0).toLocaleString("id-ID");
+
+      $("totalAmount").textContent = rupiah(data.totalReportedAmount);
+
+      $("totalDonors").textContent =
+        Number(data.uniqueDonors || 0).toLocaleString("id-ID");
+
+      $("reportsToday").textContent =
+        Number(data.reportsToday || 0).toLocaleString("id-ID");
+    }
+
+    function setTableMessage(element, message, className = "empty", colspan = 6) {
+      element.innerHTML =
+        `<tr><td colspan="${colspan}" class="${className}">${escapeHTML(message)}</td></tr>`;
+    }
+
+    async function loadDonations() {
+      const tbody = $("donationsTable");
+      setTableMessage(tbody, "Memuat data...", "loading");
+
+      try {
+        const result = await apiRequest({
+          view: "donations",
+          page: donationPage,
+          limit: 20,
+          search: $("donationSearch").value.trim(),
+          from: $("dateFrom").value,
+          to: $("dateTo").value
+        });
+
+        const items = result.data || [];
+        const pagination = result.pagination || {};
+
+        donationTotalPages = Math.max(1, pagination.totalPages || 1);
+
+        if (!items.length) {
+          setTableMessage(tbody, "Belum ada laporan donasi.", "empty");
+        } else {
+          tbody.innerHTML = items.map((item) => `
+            <tr>
+              <td>${escapeHTML(formatDate(item.createdAt))}</td>
+              <td><strong>${escapeHTML(item.name || "Hamba Allah")}</strong></td>
+              <td>${escapeHTML(item.whatsapp || "-")}</td>
+              <td>${escapeHTML(item.program || "-")}</td>
+              <td><strong>${escapeHTML(rupiah(item.amount))}</strong></td>
+              <td><span class="status">${escapeHTML(item.status || "reported")}</span></td>
+            </tr>
+          `).join("");
+        }
+
+        $("donationPaginationInfo").textContent =
+          `Halaman ${donationPage} dari ${donationTotalPages} · ${pagination.total || 0} laporan`;
+
+        $("donationPrev").disabled = donationPage <= 1;
+        $("donationNext").disabled = donationPage >= donationTotalPages;
+
+      } catch (error) {
+        setTableMessage(tbody, error.message, "error");
+      }
+    }
+
+    async function loadDonors() {
+      const tbody = $("donorsTable");
+      setTableMessage(tbody, "Memuat data donatur...", "loading");
+
+      try {
+        const result = await apiRequest({
+          view: "donors",
+          page: donorPage,
+          limit: 20,
+          search: $("donorSearch").value.trim()
+        });
+
+        const items = result.data || [];
+        const pagination = result.pagination || {};
+
+        donorTotalPages = Math.max(1, pagination.totalPages || 1);
+
+        if (!items.length) {
+          setTableMessage(tbody, "Belum ada data donatur.", "empty");
+        } else {
+          tbody.innerHTML = items.map((item) => `
+            <tr>
+              <td><strong>${escapeHTML(item.name || "Hamba Allah")}</strong></td>
+              <td>${escapeHTML(item.whatsapp || "-")}</td>
+              <td>${Number(item.donationCount || 0).toLocaleString("id-ID")}</td>
+              <td><strong>${escapeHTML(rupiah(item.totalReportedAmount))}</strong></td>
+              <td>${escapeHTML(formatDate(item.lastDonation))}</td>
+              <td>
+                <button
+                  class="action"
+                  data-whatsapp="${escapeHTML(item.whatsapp || "")}"
+                >Lihat Detail</button>
+              </td>
+            </tr>
+          `).join("");
+
+          tbody.querySelectorAll("[data-whatsapp]").forEach((button) => {
+            button.addEventListener("click", () => {
+              const whatsapp = button.dataset.whatsapp;
+              if (whatsapp) loadDonorDetail(whatsapp);
+            });
+          });
+        }
+
+        $("donorPaginationInfo").textContent =
+          `Halaman ${donorPage} dari ${donorTotalPages} · ${pagination.total || 0} donatur`;
+
+        $("donorPrev").disabled = donorPage <= 1;
+        $("donorNext").disabled = donorPage >= donorTotalPages;
+
+      } catch (error) {
+        setTableMessage(tbody, error.message, "error");
+      }
+    }
+
+    async function loadDonorDetail(whatsapp) {
+      $("donationsView").classList.add("hidden");
+      $("donorsView").classList.add("hidden");
+      $("donorDetailView").classList.remove("hidden");
+
+      setTableMessage($("donorHistoryTable"), "Memuat riwayat...", "loading", 4);
+
+      try {
+        const result = await apiRequest({
+          view: "donor",
+          whatsapp
+        });
+
+        const data = result.data || {};
+        const history = data.history || [];
+        const programs = [...new Set(history.map(item => item.program).filter(Boolean))];
+
+        $("detailName").textContent = data.name || "Detail Donatur";
+        $("detailWhatsapp").textContent = data.whatsapp || "-";
+        $("detailAmount").textContent = rupiah(data.totalReportedAmount);
+        $("detailCount").textContent =
+          Number(data.donationCount || 0).toLocaleString("id-ID");
+        $("detailPrograms").textContent = programs.length;
+
+        if (!history.length) {
+          setTableMessage($("donorHistoryTable"), "Belum ada riwayat.", "empty", 4);
+        } else {
+          $("donorHistoryTable").innerHTML = history.map((item) => `
+            <tr>
+              <td>${escapeHTML(formatDate(item.createdAt))}</td>
+              <td>${escapeHTML(item.program || "-")}</td>
+              <td><strong>${escapeHTML(rupiah(item.amount))}</strong></td>
+              <td><span class="status">${escapeHTML(item.status || "reported")}</span></td>
+            </tr>
+          `).join("");
+        }
+
+      } catch (error) {
+        setTableMessage($("donorHistoryTable"), error.message, "error", 4);
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        await loadSummary();
+        await loadDonations();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+
+      $("donorDetailView").classList.add("hidden");
+
+
+      $("donationsView").classList.toggle("hidden", tab !== "donations");
+      $("donorsView").classList.toggle("hidden", tab !== "donors");
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.classList.toggle("active", button.dataset.tab === tab);
+      });
+
+      if (tab === "donations") {
+        donationPage = 1;
+        loadDonations();
+      } else {
+        donorPage = 1;
+        loadDonors();
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((button) => {
+      button.addEventListener("click", () => switchTab(button.dataset.tab));
+    });
+
+    $("searchDonations").addEventListener("click", () => {
+      donationPage = 1;
+      loadDonations();
+    });
+
+    $("resetDonations").addEventListener("click", () => {
+      $("donationSearch").value = "";
+      $("dateFrom").value = "";
+      $("dateTo").value = "";
+      donationPage = 1;
+      loadDonations();
+    });
+
+    $("donationSearch").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        donationPage = 1;
+        loadDonations();
+      }
+    });
+
+    $("donationPrev").addEventListener("click", () => {
+      if (donationPage > 1) {
+        donationPage--;
+        loadDonations();
+      }
+    });
+
+    $("donationNext").addEventListener("click", () => {
+      if (donationPage < donationTotalPages) {
+        donationPage++;
+        loadDonations();
+      }
+    });
+
+    $("searchDonors").addEventListener("click", () => {
+      donorPage = 1;
+      loadDonors();
+    });
+
+    $("resetDonors").addEventListener("click", () => {
+      $("donorSearch").value = "";
+      donorPage = 1;
+      loadDonors();
+    });
+
+    $("donorSearch").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        donorPage = 1;
+        loadDonors();
+      }
+    });
+
+    $("donorPrev").addEventListener("click", () => {
+      if (donorPage > 1) {
+        donorPage--;
+        loadDonors();
+      }
+    });
+
+    $("donorNext").addEventListener("click", () => {
+      if (donorPage < donorTotalPages) {
+        donorPage++;
+        loadDonors();
+      }
+    });
+
+    $("backToDonors").addEventListener("click", () => {
+      $("donorDetailView").classList.add("hidden");
+      $("donorsView").classList.remove("hidden");
+    });
+
+    // Pulihkan sesi admin jika token masih tersimpan.
+    async function initialize() {
+      if (!adminToken) {
+        showLogin();
+        return;
+      }
+
+      try {
+        await apiRequest({ view: "summary" });
+        showDashboard();
+        await loadDashboard();
+      } catch (error) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        adminToken = "";
+        showLogin();
+      }
+    }
+
+    initialize();
+  </script>
+
+</body>
+</html>
